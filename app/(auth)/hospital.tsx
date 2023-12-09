@@ -150,6 +150,7 @@ export default function Hospital() {
                     accessibilityLabel="Choose Hospital"
                     placeholder="Choose Hospital"
                     onValueChange={handleValueChange}
+                    borderRadius={8}
                     // onValueChange={itemValue => setSelectedValue(itemValue)}
                     selectedValue={selectedValue}
                     _selectedItem={{
@@ -177,40 +178,43 @@ export default function Hospital() {
                     <Spinner
                         visible={spinner}
                     />
-                    <View style={{ width: '100%', paddingHorizontal: 20, paddingVertical: 20 }}>
+                    <View style={{ width: '100%', paddingVertical: 20 }}>
                         <Text style={styles.title}>What is the name of your hospital?</Text>
                     </View>
 
                     <View style={styles.innerContainers}>
                         <Text
-                            style={{ color: '#2A2A2ACC', textAlign: 'left', fontWeight: '600', fontSize: 14, paddingHorizontal: 20, marginBottom: 20 }}
+                            style={{ color: '#2A2A2ACC', textAlign: 'left', fontWeight: '600', fontSize: 14, marginBottom: 20 }}
                         >We need this to send reports to your hospital for easy monitoring.
                         </Text>
 
                         {
                             check && (
-                                // <Input
-                                //     placeholder="Enter Hospital Name"
-                                //     nativeID="hospital"
-                                //     onChange={(value) => handleChangeInput('hospital', value)}
-                                //     containerStyle={styles.textInput}
-                                //     inputContainerStyle={styles.inputContainer}
-                                //     errorMessage={errors.hospital}
-                                // />
+                                <VStack>
+                                    <View style={styles.inputContainer}>
+                                        <TextInput
+                                            placeholder="Enter Hospital Name"
+                                            nativeID="hospital"
+                                            onChange={(value) => handleChangeInput('hospital', value)}
+                                            style={styles.textInput}
+                                            underlineColorAndroid="transparent"
+                                            placeholderTextColor="#2A2A2A24"
+                                        />
+                                    </View>
+                                    <HStack alignItems={'center'} style={{ height: 18 }}>
+                                        {errors.hospital && <Text style={styles.errorText}>{errors.hospital}</Text>}
+                                    </HStack>
+                                </VStack>
 
-                                <TextInput
-                                    placeholder="Enter Hospital Name"
-                                    nativeID="hospital"
-                                    onChange={(value) => handleChangeInput('hospital', value)}
-                                    style={styles.textInput}
-                                    underlineColorAndroid="transparent"
-                                />
+
                             )
                         }
 
                         {
                             !check && (
-                                <HospitalDropdown />
+                                <View style={{ marginBottom: 40 }}>
+                                    <HospitalDropdown />
+                                </View>
                             )
                         }
 
@@ -227,12 +231,24 @@ export default function Hospital() {
                             checkedColor={COLORS.primary}
                         /> */}
 
-                        <Checkbox shadow={2} accessibilityLabel="Cannot find hospital, enter manually for verification." value={""} onChange={() => setCheck(!check)}>
-                            Cannot find hospital, enter manually for verification.
-                        </Checkbox>
+                        <HStack>
+                            <Checkbox
+                                shadow={2}
+                                accessibilityLabel="Cannot find hospital, enter manually for verification."
+                                value={""}
+                                bgColor={"white"}
+                                borderColor={"#2A2A2ACC"}
+                                // colorScheme={"#183059"}
+                                _checked={{ backgroundColor: "#183059", borderColor: "transparent" }}
+                                _pressed={{ borderColor: "transparent" }}
+                                onChange={() => setCheck(!check)}>
+                                Cannot find hospital, enter manually for verification.
+                            </Checkbox>
+                        </HStack>
+
                     </View>
 
-                    <View style={{ width: '100%', paddingHorizontal: 20, marginTop: 10 }}>
+                    <View style={{ width: '100%', marginTop: 10 }}>
                         <TouchableOpacity style={styles.loginBtn}
                             // onPress={handleSubmit}
                             onPress={() => {
@@ -258,6 +274,7 @@ export default function Hospital() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingHorizontal: 20,
     },
     innerContainers: {
         width: '100%',
@@ -265,7 +282,7 @@ const styles = StyleSheet.create({
         // borderColor: 'blue'
     },
     label: {
-        marginBottom: 4,
+        marginBottom: 6,
         color: COLORS.gray2,
         fontSize: 14,
         lineHeight: 21,
@@ -273,8 +290,7 @@ const styles = StyleSheet.create({
     },
     textInput: {
         fontSize: 14,
-        width: '100%',
-        paddingHorizontal: 20,
+        flex: 1,
     },
     loginBtn: {
         padding: 15,
@@ -297,14 +313,16 @@ const styles = StyleSheet.create({
         fontFamily: FONT.bold,
     },
     inputContainer: {
+        flexDirection: 'row',
         borderWidth: 1,
-        borderColor: COLORS.gray,
+        borderColor: "#2A2A2A24",
         borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: 8,
-        // paddingVertical: 2,
-        width: '100%'
+        paddingHorizontal: 16,
+        width: '100%',
+        paddingVertical: 8,
+        height: 40
     },
     title: {
         fontSize: 24,

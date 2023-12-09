@@ -23,18 +23,18 @@ const CreateAccountLoaderScreen = () => {
         });
     }, []);
 
-    useEffect(() => {
-        const timeout = setTimeout(() => {
+    // useEffect(() => {
+    //     const timeout = setTimeout(() => {
 
-        }, 8000);
-        // router.push("/success-account-loader");
+    //     }, 8000);
+    //     // router.push("/success-account-loader");
 
-        router.push({ pathname: "/success-account-loader", params: { user: resp } });
-        return () => {
-            // clear timeout when the component unmounts
-            clearTimeout(timeout);
-        };
-    }, []);
+    //     router.push({ pathname: "/success-account-loader", params: { user: resp } });
+    //     return () => {
+    //         // clear timeout when the component unmounts
+    //         clearTimeout(timeout);
+    //     };
+    // }, []);
 
     useEffect(() => {
         const handleBackPress = () => {

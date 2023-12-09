@@ -288,7 +288,7 @@ export default function Login() {
             <TouchableOpacity style={[styles.loginBtn, { backgroundColor: '#18305914' }]}
               onPress={() => {
                 // router.push("/create-account");
-                router.push("/accountability-partners");
+                router.push("/create-account-loader");
               }}
             >
               <Text style={[styles.loginBtnText, { color: COLORS.primary }]}>Create An Account</Text>
@@ -304,7 +304,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    justifyContent: 'center'
   },
   innerContainers: {
     width: '100%',

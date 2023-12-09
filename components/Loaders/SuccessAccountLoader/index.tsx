@@ -3,8 +3,6 @@ import { Dimensions, View } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { COLORS } from "../../../constants";
 
-const { width, height } = Dimensions.get('window');
-
 const SuccessAccountLoader = ({ color, ...props }: { color?: string }) => {
     const animation = useRef(null);
 
@@ -14,12 +12,11 @@ const SuccessAccountLoader = ({ color, ...props }: { color?: string }) => {
                 autoPlay
                 ref={animation}
                 style={{
-                    width: width,
-                    height: 200,
+                    width: '80%',
                     backgroundColor: COLORS.white,
                 }}
-                // source={colorizedSource}
                 source={require('../../../assets/UserAnimation.json')}
+                resizeMode='cover'
             />
         </View>
     );

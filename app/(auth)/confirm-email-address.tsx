@@ -172,7 +172,9 @@ export default function ConfirmEmailAddress() {
                         > A token has been sent to {email}.
                         </Text>
                         <AnimatedCodeField onValueChange={handleCodeFieldValueChange} />
-                        {errors.token && <Text style={styles.errorText}>{errors.token}</Text>}
+                        <HStack alignItems={'center'} style={{ height: 18, marginTop: Platform.OS === 'ios' ? 10 : 0 }}>
+                            {errors.token && <Text style={styles.errorText}>{errors.token}</Text>}
+                        </HStack>
                     </View>
                     <View style={{ width: '100%', paddingHorizontal: 20, marginTop: 10 }}>
                         <TouchableOpacity style={styles.loginBtn}
