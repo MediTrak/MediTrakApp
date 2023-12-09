@@ -235,6 +235,7 @@ export default function CreateAccount() {
                 onChange={(value) => handleChangeInput('firstName', value)}
                 style={styles.textInput}
                 underlineColorAndroid="transparent"
+                placeholderTextColor="#2A2A2A24"
               />
             </View>
             <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
@@ -251,6 +252,7 @@ export default function CreateAccount() {
                 onChange={(value) => handleChangeInput('lastName', value)}
                 style={styles.textInput}
                 underlineColorAndroid="transparent"
+                placeholderTextColor="#2A2A2A24"
               />
             </View>
             <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
@@ -267,6 +269,7 @@ export default function CreateAccount() {
                 onChange={(value) => handleChangeInput('email', value)}
                 style={styles.textInput}
                 underlineColorAndroid="transparent"
+                placeholderTextColor="#2A2A2A24"
               />
             </View>
             <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
@@ -284,6 +287,7 @@ export default function CreateAccount() {
                 onChange={(value) => handleChangeInput('password', value)}
                 style={styles.textInput}
                 underlineColorAndroid="transparent"
+                placeholderTextColor="#2A2A2A24"
               />
               <Pressable onPress={handleClick}>
                 < Icon as={<MaterialIcons name={show ? "visibility" : "visibility-off"} />} size={5} color="#2A2A2ACC" />
@@ -348,8 +352,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     fontSize: 14,
-    width: '100%',
-    paddingHorizontal: 20,
+    flex: 1,
   },
   signBtn: {
     padding: 15,

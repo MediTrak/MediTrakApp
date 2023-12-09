@@ -189,7 +189,7 @@ export default function ResetPassword() {
           <Spinner
             visible={spinner}
           />
-          <View style={{ width: '100%', paddingHorizontal: 20, paddingVertical: 20 }}>
+          <View style={{ width: '100%', paddingVertical: 20 }}>
             <Text style={styles.title}>Reset Password</Text>
           </View>
 
@@ -214,7 +214,7 @@ export default function ResetPassword() {
           </View>
 
           <View style={styles.innerContainers}>
-          <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>Password</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 placeholder="Confirm New Password"
@@ -233,7 +233,7 @@ export default function ResetPassword() {
             </HStack>
           </View>
 
-          <View style={{ width: '100%', paddingHorizontal: 20, marginTop: 20 }}>
+          <View style={{ width: '100%', marginTop: 20 }}>
             <TouchableOpacity
               style={styles.signBtn}
               onPress={handleSubmit}
@@ -251,8 +251,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     justifyContent: 'flex-start',
-    // borderWidth: 1,
-    // borderColor: 'red',
+    paddingHorizontal: 20,
   },
   innerContainers: {
     width: '100%',
@@ -260,7 +259,7 @@ const styles = StyleSheet.create({
     // borderColor: 'blue',
   },
   label: {
-    marginBottom: 4,
+    marginBottom: 6,
     color: COLORS.gray2,
     fontSize: 14,
     lineHeight: 21,
@@ -268,8 +267,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     fontSize: 14,
-    width: '100%',
-    paddingHorizontal: 20,
+    flex: 1
   },
   signBtn: {
     padding: 15,
@@ -292,14 +290,16 @@ const styles = StyleSheet.create({
     fontFamily: FONT.bold,
   },
   inputContainer: {
+    flexDirection: 'row',
     borderWidth: 1,
-    borderColor: COLORS.gray,
+    borderColor: "#2A2A2A24",
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
-    // paddingVertical: 2,
-    width: '100%'
+    paddingHorizontal: 16,
+    width: '100%',
+    paddingVertical: 8,
+    height: 40
   },
   title: {
     fontSize: 24,
