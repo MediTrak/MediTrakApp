@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
@@ -7,6 +7,7 @@ import { NativeBaseProvider } from 'native-base';
 import { store } from './store';
 import { Provider } from 'react-redux';
 import { AuthProvider } from './context/auth';
+import { Linking } from 'react-native';
 
 export {
   // Catch any errors thrown by the Layout component.

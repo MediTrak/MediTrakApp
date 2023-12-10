@@ -287,8 +287,8 @@ export default function Login() {
             </TouchableOpacity>
             <TouchableOpacity style={[styles.loginBtn, { backgroundColor: '#18305914' }]}
               onPress={() => {
-                router.push("/create-account");
-                // router.push("/medication-form");
+                // router.push("/create-account");
+                router.push("/add-evidence");
               }}
             >
               <Text style={[styles.loginBtnText, { color: COLORS.primary }]}>Create An Account</Text>

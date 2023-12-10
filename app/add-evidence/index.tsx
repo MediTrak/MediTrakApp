@@ -1,24 +1,47 @@
-import { ScrollView, StatusBar, StyleSheet, TouchableOpacity, View, Text, Platform, Image } from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, TouchableOpacity, View, Text, Platform, Image, Linking } from 'react-native';
 import { Stack, useNavigation } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../constants';
 import { HStack } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import BottomSheetComponent from '../../components/BottomSheet';
-import { useMemo, useState } from 'react';
-// import { Camera, CameraType } from 'expo-camera';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Camera, useCameraDevice, useCameraDevices } from 'react-native-vision-camera';
 
 export default function AddEvidence() {
     const navigation = useNavigation();
 
     const [bottomSheetOpen, setBottomSheetOpen] = useState(false);
 
-    // const [type, setType] = useState(CameraType.back);
-    // const [permission, requestPermission] = Camera.useCameraPermissions();
+    const camera = useRef<Camera>(null)
+    const device = useCameraDevice('back')
 
-    // function toggleCameraType() {
-    //     setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
-    // }
+    const [showCamera, setShowCamera] = useState(false);
+    const [imageSource, setImageSource] = useState('');
+
+    useEffect(() => {
+        async function getPermission() {
+            const newCameraPermission = await Camera.requestCameraPermission();
+            setShowCamera(true)
+            console.log('see camera permission:', newCameraPermission );
+        }
+        getPermission();
+    }, []);
+
+    const capturePhoto = async () => {
+        if (camera.current !== null) {
+            const photo = await camera.current.takePhoto({
+                flash: 'auto'
+            });
+            setImageSource(photo.path);
+            setShowCamera(false);
+            console.log(photo.path);
+        }
+    };
+
+    if (device == null) {
+        return <Text>No camera detected</Text>
+    }
 
     // variables
     const snapPoints = useMemo(() => ['50%'], []);
@@ -40,23 +63,39 @@ export default function AddEvidence() {
             </HStack>
 
             <View style={{ paddingHorizontal: 20, flex: 1, width: '100%' }}>
-                <Image
-                    source={require('../../assets/images/rectangle.png')}
-                    style={styles.image}
-                />
+                {showCamera || imageSource == '' ? (
+                    <>
+                        <Camera
+                            ref={camera}
+                            style={styles.image}
+                            device={device}
+                            isActive={showCamera}
+                            photo={true}
+                        />
 
-                {/* <Camera style={styles.image} type={type}>
-                    <View>
-                        <TouchableOpacity onPress={toggleCameraType}>
-                            <Text>Flip Camera</Text>
-                        </TouchableOpacity>
-                    </View>
-                </Camera> */}
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity
+                                style={styles.camButton}
+                                onPress={() => capturePhoto()}
+                            />
+                        </View>
+                    </>
+                ) : (
+                    <>
+                        {imageSource !== '' ? (
+                            <Image
+                                style={styles.image}
+                                source={{
+                                    uri: `file://'${imageSource}`,
+                                }}
+                            />
+                        ) : null}
+                    </>
+                )}
+
             </View>
 
-
-
-            <Text style={{ fontSize: 14, color: "#2a2a2a", textAlign: "center", fontWeight: '600', marginTop: 20 }}>Take a selfie</Text>
+            <Text style={{ fontSize: 14, color: "#2a2a2a", textAlign: "center", fontWeight: '600', marginTop: 20 }}>Take Picture Evidence</Text>
 
             <View style={{ width: '100%', paddingHorizontal: 20, marginTop: 20 }}>
                 <TouchableOpacity style={styles.loginBtn}
@@ -64,7 +103,7 @@ export default function AddEvidence() {
                     <Text style={styles.loginBtnText}>Send Photo</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.loginBtn, { backgroundColor: '#18305914' }]}
-                >
+                onPress={() => setShowCamera(true)}>
                     <Text style={[styles.loginBtnText, { color: COLORS.primary }]}>Retake Photo</Text>
                 </TouchableOpacity>
             </View>
@@ -110,7 +149,8 @@ const styles = StyleSheet.create({
     image: {
         width: '100%',
         objectFit: 'fill',
-        flex: 1
+        flex: 1,
+        borderRadius: 8
     },
 
     loginBtn: {
@@ -142,5 +182,39 @@ const styles = StyleSheet.create({
         color: COLORS.primary,
         fontWeight: '600',
         textAlign: 'center'
+    },
+    buttonContainer: {
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        position: 'absolute',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        bottom: 0,
+        left: 20,
+        padding: 10,
+    },
+    buttons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    camButton: {
+        height: 80,
+        width: 80,
+        borderRadius: 40,
+        //ADD backgroundColor COLOR GREY
+        backgroundColor: '#B2BEB5',
+
+        alignSelf: 'center',
+        borderWidth: 4,
+        borderColor: 'white',
+    },
+    backButton: {
+        backgroundColor: 'rgba(0,0,0,0.0)',
+        position: 'absolute',
+        justifyContent: 'center',
+        width: '100%',
+        top: 0,
+        padding: 20,
     },
 });
