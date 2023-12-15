@@ -12,12 +12,7 @@ import { StatusBarBlurBackground } from '../../components/views/StatusBarBlurBac
 import { CaptureButton } from '../../components/views/CaptureButton'
 import { PressableOpacity } from 'react-native-pressable-opacity'
 import { MaterialIcons, Ionicons }from '@expo/vector-icons'
-
-import type { Routes } from '../Routes'
-import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useIsFocused } from '@react-navigation/core'
-import { examplePlugin } from '../frame-processors/ExamplePlugin'
-import { exampleKotlinSwiftPlugin } from '../frame-processors/ExampleKotlinSwiftPlugin'
 import { usePreferredCameraDevice } from '../hooks/usePreferredCameraDevice'
 
 const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera)
@@ -27,8 +22,7 @@ Reanimated.addWhitelistedNativeProps({
 
 const SCALE_FULL_ZOOM = 3
 
-type Props = NativeStackScreenProps<Routes, 'CameraPage'>
-export function CameraPage({ navigation }: Props): React.ReactElement {
+export default function CameraPage(): React.ReactElement {
   const camera = useRef<Camera>(null)
   const [isCameraInitialized, setIsCameraInitialized] = useState(false)
   const [hasMicrophonePermission, setHasMicrophonePermission] = useState(false)
@@ -104,12 +98,12 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
   const onMediaCaptured = useCallback(
     (media: PhotoFile | VideoFile, type: 'photo' | 'video') => {
       console.log(`Media captured! ${JSON.stringify(media)}`)
-      navigation.navigate('MediaPage', {
-        path: media.path,
-        type: type,
-      })
+      // navigation.navigate('MediaPage', {
+      //   path: media.path,
+      //   type: type,
+      // })
     },
-    [navigation],
+    [],
   )
   const onFlipCameraPressed = useCallback(() => {
     setCameraPosition((p) => (p === 'back' ? 'front' : 'back'))
@@ -153,21 +147,19 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
   })
   //#endregion
 
-  useEffect(() => {
-    const f =
-      format != null
-        ? `(${format.photoWidth}x${format.photoHeight} photo / ${format.videoWidth}x${format.videoHeight}@${format.maxFps} video @ ${fps}fps)`
-        : undefined
-    console.log(`Camera: ${device?.name} | Format: ${f}`)
-  }, [device?.name, format, fps])
+  // useEffect(() => {
+  //   const f =
+  //     format != null
+  //       ? `(${format.photoWidth}x${format.photoHeight} photo / ${format.videoWidth}x${format.videoHeight}@${format.maxFps} video @ ${fps}fps)`
+  //       : undefined
+  //   console.log(`Camera: ${device?.name} | Format: ${f}`)
+  // }, [device?.name, format, fps])
 
-  const frameProcessor = useFrameProcessor((frame) => {
-    'worklet'
+  // const frameProcessor = useFrameProcessor((frame) => {
+  //   'worklet'
 
-    console.log(`${frame.timestamp}: ${frame.width}x${frame.height} ${frame.pixelFormat} Frame (${frame.orientation})`)
-    examplePlugin(frame)
-    exampleKotlinSwiftPlugin(frame)
-  }, [])
+  //   console.log(`${frame.timestamp}: ${frame.width}x${frame.height} ${frame.pixelFormat} Frame (${frame.orientation})`)
+  // }, [])
 
   return (
     <View style={styles.container}>
@@ -195,7 +187,7 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
                 photo={true}
                 video={true}
                 audio={hasMicrophonePermission}
-                frameProcessor={frameProcessor}
+                // frameProcessor={frameProcessor}
               />
             </TapGestureHandler>
           </Reanimated.View>
@@ -230,22 +222,16 @@ export function CameraPage({ navigation }: Props): React.ReactElement {
             <Text style={styles.text}>{`${targetFps}\nFPS`}</Text>
           </PressableOpacity>
         )}
-        {/* {supportsHdr && (
+        {supportsHdr && (
           <PressableOpacity style={styles.button} onPress={() => setEnableHdr((h) => !h)}>
-            <MaterialIcons name={enableHdr ? 'hdr' : 'hdr-off'} color="white" size={24} />
+            <MaterialIcons name={enableHdr ? 'hdr-on' : 'hdr-off'} color="white" size={24} />
           </PressableOpacity>
-        )} */}
+        )}
         {canToggleNightMode && (
           <PressableOpacity style={styles.button} onPress={() => setEnableNightMode(!enableNightMode)} disabledOpacity={0.4}>
             <Ionicons name={enableNightMode ? 'moon' : 'moon-outline'} color="white" size={24} />
           </PressableOpacity>
         )}
-        <PressableOpacity style={styles.button} onPress={() => navigation.navigate('Devices')}>
-          <Ionicons name="settings-outline" color="white" size={24} />
-        </PressableOpacity>
-        <PressableOpacity style={styles.button} onPress={() => navigation.navigate('CodeScannerPage')}>
-          <Ionicons name="qr-code-outline" color="white" size={24} />
-        </PressableOpacity>
       </View>
     </View>
   )
@@ -273,7 +259,7 @@ const styles = StyleSheet.create({
   rightButtonRow: {
     position: 'absolute',
     right: SAFE_AREA_PADDING.paddingRight,
-    top: SAFE_AREA_PADDING.paddingTop,
+    top: SAFE_AREA_PADDING.paddingTop + 40,
   },
   text: {
     color: 'white',

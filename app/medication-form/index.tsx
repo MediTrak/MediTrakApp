@@ -11,7 +11,6 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import DateTimePicker, { Event } from '@react-native-community/datetimepicker';
 import React from "react";
 import { useAuth } from "../context/auth";
-import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { useGetMedicationQuery } from '../services/mediTrakApi';
 
 interface FormData {
@@ -44,7 +43,7 @@ export default function MedicationForm() {
 
     const filteredMedicationData = medicationData.filter((entry: { _id: string | string[]; }) => entry._id === id)
 
-    console.log(filteredMedicationData, 'filtered medication data')
+    // console.log(filteredMedicationData, 'filtered medication data')
 
     const navigation = useNavigation();
     const [show, setShow] = useState(false);
@@ -83,7 +82,7 @@ export default function MedicationForm() {
 
     const { medicationName, dailyUsageNoOfTimes, usageTime, tabletsPerUsage, startDate, endDate } = formData;
 
-    console.log(id, medicationName, dailyUsageNoOfTimes, 'id and filtered from planner');
+    // console.log(id, medicationName, dailyUsageNoOfTimes, 'id and filtered from planner');
 
     const [errors, setErrors] = useState({
         medicationName: '',
@@ -95,9 +94,9 @@ export default function MedicationForm() {
         usageTimes: ''
     });
 
-    console.log(dailyUsageNoOfTimes, 'daily usage number of times')
+    // console.log(dailyUsageNoOfTimes, 'daily usage number of times')
 
-    const [selectedValue, setSelectedValue] = useState<string>(dailyUsageNoOfTimes);
+    const [selectedValue, setSelectedValue] = useState<string>(`${dailyUsageNoOfTimes}`);
 
     const timeOptions = Array.from({ length: 24 }, (_, index) => {
         const hour = index < 10 ? `0${index}` : `${index}`;
@@ -111,7 +110,7 @@ export default function MedicationForm() {
 
     const [showPickerEndDate, setShowPickerEndDate] = useState(false);
 
-    const [showUsageTime, setShowUsageTime] = useState(false);
+    const [showUsageTime, setShowUsageTime] = useState<{ [index: number]: boolean }>({});
 
     const dailyUsageNumberValue: number = parseInt(dailyUsageNoOfTimes, 10) as number;
 
@@ -128,13 +127,11 @@ export default function MedicationForm() {
 
     const dateArray = convertToDates(filteredMedicationData[0]?.timeToTake || []);
 
-    console.log(dateArray, selectedValue, 'time from backend');
+    // console.log(dateArray, selectedValue, 'time from backend');
 
     const [usageTimes, setUsageTimes] = useState<Date[]>(dateArray || []);
 
-    const [time, setTime] = useState(new Date(1598051730000));
-
-    console.log(usageTimes, selectedValue, 'usageTimes')
+    const [time, setTime] = useState(new Date(Date.now()));
 
     const onChangeStartDate = (event: any, selectedDate: any) => {
         const currentDate = selectedDate;
@@ -151,19 +148,28 @@ export default function MedicationForm() {
     };
 
     const onChangeUsageTime = (event: any, selectedTime: any, index: number) => {
-        const currentTime = selectedTime;
-        setShowUsageTime(false);
+        const currentTime = new Date(selectedTime.getTime() + 60 * 60 * 1000);
+        setShowUsageTime((prev) => ({ ...prev, [index]: false }));
 
-        setUsageTimes([...usageTimes, currentTime]);
-
-        // setUsageTimes(prevUsageTimes => [...prevUsageTimes, currentTime]);
-        setTime(currentTime)
-
+        if (event.type == "set") { //ok button
+            // Check if the index already exists in the array
+            if (index < usageTimes.length) {
+                // If it exists, replace the value at that index
+                const updatedUsageTimes = [...usageTimes];
+                updatedUsageTimes[index] = currentTime;
+                setUsageTimes(updatedUsageTimes);
+            } else {
+                // If it doesn't exist, add the new value to the end of the array
+                setUsageTimes([...usageTimes, currentTime]);
+            }
+            setTime(selectedTime);
+        } else { //cancel Button
+            return null
+        }
         setErrors((prevErrors) => ({
             ...prevErrors,
             [index]: '',
         }));
-
     };
 
     useEffect(() => {
@@ -177,8 +183,7 @@ export default function MedicationForm() {
         return () => {
             BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
         };
-    }, [navigation]); // Include navigation in the dependency array
-
+    }, [navigation]);
 
     const showDatepickerStart = () => {
         setShowPickerStartDate(true);
@@ -189,7 +194,7 @@ export default function MedicationForm() {
     };
 
     const showUsage = (index: number) => {
-        setShowUsageTime(true);
+        setShowUsageTime((prev) => ({ ...prev, [index]: true }));
     };
 
     const handleValueChange = (value: string) => {
@@ -325,7 +330,7 @@ export default function MedicationForm() {
                 id: drugId
             };
 
-            console.log(medicationParams, 'medication params')
+            // console.log(medicationParams, 'medication params')
 
             if (isEdit) {
                 const result = await onEditMedication!(medicationParams.medicationName, medicationParams.dailyUsageNoOfTimes, medicationParams.usageTime, medicationParams.tabletsPerUsage, medicationParams.startDate, medicationParams.endDate, medicationParams.id)
@@ -417,12 +422,12 @@ export default function MedicationForm() {
                     selectedValue={selectedValue}
                     _selectedItem={{
                         bg: COLORS.primary,
-                        endIcon: <CheckIcon size={5}/>
+                        endIcon: <CheckIcon size={5} />
                     }}
                     mt="1"
                     mb="1"
                     fontSize="14"
-                    defaultValue={selectedValue}
+                    // defaultValue={selectedValue}
                 >
                     <Select.Item label="Once" value="1" />
                     <Select.Item label="Twice" value="2" />
@@ -473,20 +478,6 @@ export default function MedicationForm() {
                         <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
                             {errors.medicationName && <Text style={styles.errorText}>{errors.medicationName}</Text>}
                         </HStack>
-
-
-                        {/* <Input
-                            placeholder="Enter Medication"
-                            autoCapitalize="none"
-                            nativeID="medicationName"
-                            onChange={(value) => handleChangeInput('medicationName', value)}
-                            containerStyle={styles.textInput}
-                            inputContainerStyle={styles.inputContainer}
-                            errorMessage={errors.medicationName}
-                            label="Name of Medication"
-                            labelStyle={styles.label}
-                            value={medicationName}
-                        /> */}
                     </View>
 
                     <VStack style={[styles.innerContainers]}>
@@ -521,43 +512,14 @@ export default function MedicationForm() {
                                     <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
                                         {errors.usageTime && <Text style={styles.errorText}>{errors.usageTime}</Text>}
                                     </HStack>
-                                    {/* <Input
-                                        placeholder="9:00pm"
-                                        nativeID={`usageTime_${index}`}
-                                        onChange={(value) => handleChangeInput(`usageTime_${index}`, value, index)}
-                                        containerStyle={{ width: '100%', paddingHorizontal: 0, paddingLeft: 20 }}
-                                        inputContainerStyle={{
-                                            borderWidth: 1,
-                                            borderColor: COLORS.gray,
-                                            borderRadius: 8,
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            width: '100%',
-                                            paddingHorizontal: 8,
-                                        }}
-                                        rightIcon={
-                                            <TouchableOpacity onPress={() => showUsage(index)}>
-                                                <AntDesign name="clockcircleo" size={16} color={'#2A2A2A'} />
-                                            </TouchableOpacity>
-                                        }
-                                        rightIconContainerStyle={{
-                                            height: 'auto'
-                                        }}
-                                        errorMessage={errors.usageTime}
-                                        value={extractTimeFromDate(usageTimes[index])}
-                                        editable={false}
-                                    /> */}
 
-                                    {showUsageTime && (
-                                        <RNDateTimePicker
-                                            testID={`dateTimePicker_${index}`}
+                                    {showUsageTime[index] && (
+                                        <DateTimePicker
+                                            key={index}
                                             value={time}
                                             mode='time'
                                             is24Hour={true}
                                             onChange={(event, date) => onChangeUsageTime(event, date, index)}
-                                            minimumDate={startDate}
-                                            minuteInterval={30}
-                                            key={index}
                                             display="clock"
                                         />
                                     )}
@@ -585,20 +547,6 @@ export default function MedicationForm() {
                         <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
                             {errors.tabletsPerUsage && <Text style={styles.errorText}>{errors.tabletsPerUsage}</Text>}
                         </HStack>
-                        {/* <Input
-                            placeholder="Enter tablets per usage"
-                            autoCapitalize="none"
-                            nativeID="tabletsPerUsage"
-                            onChange={(value) => handleChangeInput('tabletsPerUsage', value)}
-                            containerStyle={styles.textInput}
-                            inputContainerStyle={styles.inputContainer}
-                            errorMessage={errors.tabletsPerUsage}
-                            label="How many tablet per usage"
-                            labelStyle={styles.label}
-                            inputMode="numeric"
-                            keyboardType="numeric"
-                            value={tabletsPerUsage.toString()}
-                        /> */}
                     </View>
 
                     <HStack style={[styles.innerContainers]} alignItems={'center'} justifyContent={'space-between'}>
@@ -791,7 +739,7 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingVertical: 8,
         height: 40
-      },
+    },
     title: {
         fontSize: 18,
         lineHeight: 27,

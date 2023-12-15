@@ -4,7 +4,7 @@ import { View, StyleSheet, Image, Text, Platform, TouchableOpacity, Alert, Modal
 import { COLORS } from "../../constants";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import Popover, { PopoverPlacement } from 'react-native-popover-view';
+// import Popover, { PopoverPlacement } from 'react-native-popover-view';
 
 
 type Props = {
