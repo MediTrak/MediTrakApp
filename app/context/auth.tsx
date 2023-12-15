@@ -29,6 +29,7 @@ interface AuthProps {
   onEditMedication?: (name: string, timesDaily: number, timeToTake: string[], dosage: string, fromWhen: string, tillWhen: string, id: string) => Promise<any>;
   onDeleteMedication?: (id: string) => Promise<any>;
   onConfirmForgot?: (resetToken: string) => Promise<any>;
+  onAcceptMedication?: (id: string) => Promise<any>;
 }
 
 const TOKEN_KEY = 'user-token';
@@ -237,8 +238,6 @@ export const AuthProvider = ({ children }: any) => {
 
     const userToken = await SecureStore.getItemAsync(TOKEN_KEY);
 
-    console.log(userToken, 'see token auth')
-
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -306,7 +305,49 @@ export const AuthProvider = ({ children }: any) => {
 
       return { data: result.data, error: false };
     } catch (e) {
-      console.error(e, 'error delete medication');
+      console.error(e, 'error deleting medication');
+      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+    }
+
+  };
+
+  const acceptMedication = async (id: string) => {
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authState.token}`
+      }
+    };
+
+    try {
+
+      const result = await axios.get(`${API_URL}/api/medication/${id}/accept-reminder`, config);
+
+      return { data: result.data, error: false };
+    } catch (e) {
+      console.error(e, 'error accepting medication');
+      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+    }
+
+  };
+
+  const getMedications = async () => {
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authState.token}`
+      }
+    };
+
+    try {
+
+      const result = await axios.get(`${API_URL}/api/medication`, config);
+
+      return { data: result.data, error: false };
+    } catch (e) {
+      console.error(e, 'error getting medication');
       return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
     }
 
@@ -322,10 +363,11 @@ export const AuthProvider = ({ children }: any) => {
     authState,
     user: authState ? authState.user : null,
     onAddMedication: addMedication,
-    // onGetMedication: getMedications,
+    onGetMedication: getMedications,
     onEditMedication: editMedication,
     onDeleteMedication: deleteMedication,
-    onConfirmForgot: confirmForgotPassword
+    onConfirmForgot: confirmForgotPassword,
+    onAcceptMedication: acceptMedication
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

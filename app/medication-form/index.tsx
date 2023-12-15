@@ -41,18 +41,13 @@ export default function MedicationForm() {
 
     const medicationData = medication?.data || [];
 
-    const filteredMedicationData = medicationData.filter((entry: { _id: string | string[]; }) => entry._id === id)
-
-    // console.log(filteredMedicationData, 'filtered medication data')
+    const filteredMedicationData: any = medicationData.filter((entry: { _id: string | string[]; }) => entry._id === id)
 
     const navigation = useNavigation();
     const [show, setShow] = useState(false);
     const handleClick = () => setShow(!show);
     const [isLoading, setLoading] = useState(false);
     const toast = useToast();
-
-    // const [date, setDate] = useState(new Date());
-    const [mode, setMode] = useState('date');
 
     const today = new Date();
 
@@ -77,12 +72,9 @@ export default function MedicationForm() {
         endDate: endMedicationDate || today
     });
 
-
     const [spinner, setSpinner] = useState(false);
 
     const { medicationName, dailyUsageNoOfTimes, usageTime, tabletsPerUsage, startDate, endDate } = formData;
-
-    // console.log(id, medicationName, dailyUsageNoOfTimes, 'id and filtered from planner');
 
     const [errors, setErrors] = useState({
         medicationName: '',
@@ -94,17 +86,7 @@ export default function MedicationForm() {
         usageTimes: ''
     });
 
-    // console.log(dailyUsageNoOfTimes, 'daily usage number of times')
-
     const [selectedValue, setSelectedValue] = useState<string>(`${dailyUsageNoOfTimes}`);
-
-    const timeOptions = Array.from({ length: 24 }, (_, index) => {
-        const hour = index < 10 ? `0${index}` : `${index}`;
-        return {
-            label: `${hour}:00`,
-            value: `${index}:00`,
-        };
-    });
 
     const [showPickerStartDate, setShowPickerStartDate] = useState(false);
 
@@ -118,7 +100,7 @@ export default function MedicationForm() {
         return timeArray?.map((time) => {
             const [hours, minutes] = time?.split(':');
             const date = new Date();
-            date.setHours(Number(hours));
+            date.setHours(Number(hours) + 1);
             date.setMinutes(Number(minutes));
             date.setSeconds(0);
             return date;
@@ -126,8 +108,6 @@ export default function MedicationForm() {
     };
 
     const dateArray = convertToDates(filteredMedicationData[0]?.timeToTake || []);
-
-    // console.log(dateArray, selectedValue, 'time from backend');
 
     const [usageTimes, setUsageTimes] = useState<Date[]>(dateArray || []);
 
@@ -270,14 +250,14 @@ export default function MedicationForm() {
 
     const validateInputs = () => {
         let validationPassed = true;
-        const newErrors = { medicationName: '', dailyUsageNoOfTimes: '', usageTime: '', tabletsPerUsage: '', startDate: '', endDate: '', usageTimes: '' };
+        const newErrors = { medicationName: '', dailyUsageNoOfTimes: '', usageTime: '', tabletsPerUsage: '', startDate: '', endDate: '', usageTimes: '', selectedValue: '' };
 
         if (!medicationName.trim()) {
             newErrors.medicationName = 'Medication Name is required';
             validationPassed = false;
         }
 
-        if (!dailyUsageNoOfTimes.trim()) {
+        if (!selectedValue.trim()) {
             newErrors.dailyUsageNoOfTimes = 'Daily Usage Number of Times is required';
             validationPassed = false;
         }
@@ -329,8 +309,6 @@ export default function MedicationForm() {
                 user: '',
                 id: drugId
             };
-
-            // console.log(medicationParams, 'medication params')
 
             if (isEdit) {
                 const result = await onEditMedication!(medicationParams.medicationName, medicationParams.dailyUsageNoOfTimes, medicationParams.usageTime, medicationParams.tabletsPerUsage, medicationParams.startDate, medicationParams.endDate, medicationParams.id)
@@ -388,7 +366,7 @@ export default function MedicationForm() {
                 const goBackWithDelay = () => {
                     setTimeout(() => {
                         navigation.goBack();
-                    }, 2000); // 2000 milliseconds or 2 seconds
+                    }, 1000); // 2000 milliseconds or 2 seconds
                 };
 
                 goBackWithDelay();
@@ -571,32 +549,6 @@ export default function MedicationForm() {
                             <HStack justifyContent={'space-between'} alignItems={'flex-start'} style={{ height: 36 }}>
                                 {errors.startDate && <Text style={styles.errorText}>{errors.startDate}</Text>}
                             </HStack>
-                            {/* <Input
-                                placeholder="DD/MM/YYYY"
-                                nativeID="startDate"
-                                onChange={(value) => handleChangeInput('startDate', value)}
-                                containerStyle={{ width: '100%', paddingHorizontal: 0, paddingLeft: 20 }}
-                                inputContainerStyle={{
-                                    borderWidth: 1,
-                                    borderColor: COLORS.gray,
-                                    borderRadius: 8,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '100%',
-                                    paddingHorizontal: 8,
-                                }}
-                                rightIcon={
-                                    <TouchableOpacity onPress={showDatepickerStart}>
-                                        <Ionicons name="today-outline" size={16} color={'#2A2A2A'} />
-                                    </TouchableOpacity>
-                                }
-                                rightIconContainerStyle={{
-                                    height: 'auto'
-                                }}
-                                errorMessage={errors.startDate}
-                                value={startDate?.toISOString().split('T')[0]}
-                                editable={false}
-                            /> */}
 
                             {showPickerStartDate && (
                                 <DateTimePicker
@@ -630,32 +582,7 @@ export default function MedicationForm() {
                             <HStack justifyContent={'space-between'} alignItems={'flex-start'} style={{ height: 36 }}>
                                 {errors.endDate && <Text style={styles.errorText}>{errors.endDate}</Text>}
                             </HStack>
-                            {/* <Input
-                                placeholder="DD/MM/YYYY"
-                                nativeID="endDate"
-                                onChange={(value) => handleChangeInput('endDate', value)}
-                                containerStyle={{ width: '100%', paddingHorizontal: 0, paddingRight: 20 }}
-                                inputContainerStyle={{
-                                    borderWidth: 1,
-                                    borderColor: COLORS.gray,
-                                    borderRadius: 8,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '100%',
-                                    paddingHorizontal: 8,
-                                }}
-                                rightIcon={
-                                    <TouchableOpacity onPress={showDatepickerEnd}>
-                                        <Ionicons name="today-outline" size={16} color={'#2A2A2A'} />
-                                    </TouchableOpacity>
-                                }
-                                rightIconContainerStyle={{
-                                    height: 'auto'
-                                }}
-                                errorMessage={errors.endDate}
-                                value={endDate?.toISOString().split('T')[0]}
-                                editable={false}
-                            /> */}
+                            
                             {showPickerEndDate && (
                                 <DateTimePicker
                                     testID="dateTimePicker"

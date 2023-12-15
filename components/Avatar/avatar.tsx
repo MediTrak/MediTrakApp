@@ -11,18 +11,17 @@ type AvatarComponentProps = {
 
 const AvatarBtn: React.FunctionComponent<AvatarComponentProps> = ({ avatar, handlePress }) => {
     return (
-        <TouchableWithoutFeedback onPress={handlePress}>
+        <TouchableWithoutFeedback>
             <Avatar
                 size={160}
                 style={{ backgroundColor: COLORS.primary, borderRadius: 100, width: 164, height: 164, marginTop: 20 }}
             >
                 <Text style={{fontSize: 90, color: COLORS.white }}>{avatar}</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handlePress}>
                     <MaterialIcons name='edit' size={20} color={ COLORS.white } style={styles.editIcon}/>
                 </TouchableOpacity>
             </Avatar>
         </TouchableWithoutFeedback>
-
     )
 }
 

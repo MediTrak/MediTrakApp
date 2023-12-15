@@ -14,6 +14,7 @@ import React from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import NowCard from '../../../components/NowCard';
 import { HStack } from 'native-base';
+import { extractTimeFromDate } from '../../../utils';
 
 export default function Home() {
   const { resp } = useLocalSearchParams();
@@ -36,6 +37,28 @@ export default function Home() {
 
   const medicationData = medication?.data || [];
 
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+
+  const time = new Date(Date.now());
+  const currentTime = new Date(time.getTime() + 60 * 60 * 1000);
+
+  console.log(extractTimeFromDate(currentTime), 'see extracted time')
+
+  useEffect(() => {
+    const today = new Date();
+
+    const filteredDates = medicationData.filter((item: { tillWhen: string | number | Date; }) => {
+      const tillWhenDate = new Date(item.tillWhen);
+      return tillWhenDate >= today;
+    });
+
+    setFilteredData(filteredDates);
+  }, [medicationData]);
+
+  // console.log(medicationData, 'medication')
+
+  console.log(filteredData[1], 'see filtered Data')
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
@@ -48,7 +71,7 @@ export default function Home() {
       try {
         await refetch();
       } catch (error) {
-        console.error('Error fetching hotels:', error);
+        console.error('Error fetching medications:', error);
         // Handle error if needed
       }
     }
@@ -66,7 +89,7 @@ export default function Home() {
       {/* */}
 
       {
-        medicationData?.length > 0 && (
+        filteredData?.length > 0 && (
           <View style={{ backgroundColor: COLORS.primary, height: 40, width: '100%' }}>
             <DailyGoalCard avatar={nameAvatar} />
           </View>
@@ -78,7 +101,7 @@ export default function Home() {
         <ActivityIndicator size='large' color={COLORS.primary} />
       ) : (
 
-        medicationData?.length > 0 ? (
+        filteredData?.length > 0 ? (
           <ScrollView showsVerticalScrollIndicator={false} style={[styles.drugCardsWrapper, { marginTop: 40 }]} refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }>
@@ -90,13 +113,13 @@ export default function Home() {
               </Text>
             </HStack>
 
-            <NowCard drug='Paracetamol' drugTwo='puritin' noOfTablets={3} buttonText='Show Evidence' handlePress={() =>
+            <NowCard drug='Paracetamol' drugTwo='Puritin' noOfTablets={3} buttonText='Show Evidence' handlePress={() =>
               router.push("/add-evidence")} />
 
             <Text style={styles.upcomingText}>Upcoming</Text>
 
             {
-              medicationData?.map((item: { _id: React.Key | null | undefined; name: string | undefined; timeToTake: string[] | undefined; timesDaily: number | undefined; }) => (
+              filteredData?.map((item: { _id: React.Key | null | undefined; name: string | undefined; timeToTake: string[] | undefined; timesDaily: number | undefined; }) => (
                 <DrugCard
                   key={item._id}
                   drug={item.name}
@@ -110,7 +133,7 @@ export default function Home() {
 
         ) : (
 
-          <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1, width: "100%"}} contentContainerStyle={{ alignItems: 'center', flex: 1, justifyContent: 'center'}} refreshControl={
+          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, width: "100%" }} contentContainerStyle={{ alignItems: 'center', flex: 1, justifyContent: 'center' }} refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }>
             <AddMedication />
