@@ -6,14 +6,14 @@ export interface User {
     lastName: string;
     email: string;
     id: string;
-    __v: number;
-    confirmationTokenExpiry: string;
-    confirmed: boolean;
-    hospital: {
+    __v?: number;
+    confirmationTokenExpiry?: string;
+    confirmed?: boolean;
+    hospital?: {
         name: string;
     };
-    password: string;
-    role: string;
+    password?: string;
+    role?: string;
 }
 
 

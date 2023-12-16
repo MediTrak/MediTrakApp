@@ -1,4 +1,4 @@
-import { StyleSheet, View, Platform, StatusBar, Text, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Platform, StatusBar, Text, ScrollView, ActivityIndicator, RefreshControl, TouchableOpacity, Button } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import Header from '../../../components/Header';
 import AddMedication from '../../../components/Screens/AddMedication';
@@ -15,13 +15,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import NowCard from '../../../components/NowCard';
 import { HStack } from 'native-base';
 import { extractTimeFromDate } from '../../../utils';
+import * as Notifications from 'expo-notifications';
 
 export default function Home() {
   const { resp } = useLocalSearchParams();
 
   const { user, authState, onGetMedications } = useAuth()
-
-  const [refreshing, setRefreshing] = useState(false);
 
   const firstName = user?.firstName
   const lastName = user?.lastName
@@ -33,31 +32,15 @@ export default function Home() {
 
   const router = useRouter();
 
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+
   const { data: medication, isLoading, isFetching, error, refetch, isSuccess } = useGetMedicationQuery({});
+
+  console.log(medication, isSuccess, error, 'see medication')
 
   const medicationData = medication?.data || [];
 
-  const [filteredData, setFilteredData] = useState<any[]>([]);
-
-  const time = new Date(Date.now());
-  const currentTime = new Date(time.getTime() + 60 * 60 * 1000);
-
-  console.log(extractTimeFromDate(currentTime), 'see extracted time')
-
-  useEffect(() => {
-    const today = new Date();
-
-    const filteredDates = medicationData.filter((item: { tillWhen: string | number | Date; }) => {
-      const tillWhenDate = new Date(item.tillWhen);
-      return tillWhenDate >= today;
-    });
-
-    setFilteredData(filteredDates);
-  }, [medicationData]);
-
-  // console.log(medicationData, 'medication')
-
-  console.log(filteredData[1], 'see filtered Data')
+  const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -70,8 +53,21 @@ export default function Home() {
     const fetchData = async () => {
       try {
         await refetch();
+
+        const today = new Date();
+
+        if (medicationData) {
+
+          let filteredDates = medicationData?.filter((item: { tillWhen: string | number | Date; }) => {
+            const tillWhenDate = new Date(item.tillWhen);
+            return tillWhenDate >= today;
+          });
+
+          setFilteredData(filteredDates);
+        }
+
       } catch (error) {
-        console.error('Error fetching medications:', error);
+        console.error('Error fetching hotels:', error);
         // Handle error if needed
       }
     }
@@ -79,29 +75,48 @@ export default function Home() {
 
   }, [medication])
 
+  const time = new Date(Date.now());
+
+  const currentTime = new Date(time.getTime() + 60 * 60 * 1000);
+
+  // console.log(extractTimeFromDate(currentTime), 'see extracted time')
+
+  // console.log(filteredData, 'see filtered Data')
+
+  let hasFilteredData = filteredData?.length > 0;
+
+  async function schedulePushNotification() {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Take your Drug',
+        body: 'Here is the notification body',
+        data: { data: 'goes here', url: '/home' },
+      },
+      trigger: { seconds: 10 },
+    });
+  }
+
   return (
     <SafeAreaView style={{
       flex: 1, justifyContent: "flex-start", alignItems: "center"
     }}>
       <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
       <Stack.Screen options={{ headerShown: false, title: "Home" }} />
-      <Header user={user?.firstName} />
-      {/* */}
+      <Header user={user?.firstName} handleNotificationPress={() => { router.push("/notifications") }} />
 
       {
-        filteredData?.length > 0 && (
+        hasFilteredData && (
           <View style={{ backgroundColor: COLORS.primary, height: 40, width: '100%' }}>
             <DailyGoalCard avatar={nameAvatar} />
           </View>
         )
       }
 
-
       {isLoading || isFetching ? (
         <ActivityIndicator size='large' color={COLORS.primary} />
       ) : (
 
-        filteredData?.length > 0 ? (
+        hasFilteredData ? (
           <ScrollView showsVerticalScrollIndicator={false} style={[styles.drugCardsWrapper, { marginTop: 40 }]} refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }>
@@ -118,6 +133,11 @@ export default function Home() {
 
             <Text style={styles.upcomingText}>Upcoming</Text>
 
+            <Button
+              title="Schedule test notifications"
+              onPress={schedulePushNotification}
+            />
+
             {
               filteredData?.map((item: { _id: React.Key | null | undefined; name: string | undefined; timeToTake: string[] | undefined; timesDaily: number | undefined; }) => (
                 <DrugCard
@@ -128,17 +148,13 @@ export default function Home() {
                 />
               ))
             }
-
           </ScrollView>
-
         ) : (
-
           <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, width: "100%" }} contentContainerStyle={{ alignItems: 'center', flex: 1, justifyContent: 'center' }} refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }>
             <AddMedication />
           </ScrollView>
-
         )
       )}
 

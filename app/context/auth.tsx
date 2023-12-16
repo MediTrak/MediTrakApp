@@ -3,13 +3,34 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { useRouter } from "expo-router";
 import { useDispatch } from 'react-redux';
+import { setCredentials } from '../services/authSlice';
+
+// interface User {
+//   firstName?: string;
+//   lastName?: string;
+//   email?: string;
+//   confirmed?: boolean;
+//   id: string;
+// }
 
 interface User {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  confirmed?: boolean;
+  firstName: string;
+  lastName: string;
+  email: string;
   id: string;
+  __v?: number;
+  confirmationTokenExpiry?: string;
+  confirmed?: boolean;
+  hospital?: {
+      name: string;
+  };
+  password?: string;
+  role?: string;
+}
+
+export interface UserResponse {
+  user: User;
+  token: string;
 }
 
 interface AuthProps {
@@ -70,6 +91,15 @@ export const AuthProvider = ({ children }: any) => {
             authenticated: true,
             user: storedUserInfo
           })
+
+          const userLogin: UserResponse = {
+            user: storedUserInfo,
+            token: userToken
+          }
+
+          dispatch(setCredentials(userLogin))
+
+          // console.log(userLogin, 'userLogin from secure store auth file to be dispatched')
 
         } else {
           setAuthState({
@@ -175,7 +205,7 @@ export const AuthProvider = ({ children }: any) => {
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${result?.data.token}`
 
-      await SecureStore.setItemAsync(TOKEN_KEY, result.data.token)
+      await SecureStore.setItemAsync(TOKEN_KEY, token)
 
       await SecureStore.setItemAsync(USER, userObjectString);
 

@@ -9,10 +9,13 @@ interface ScreenHeaderProps {
     user?: string | undefined;
     notificationCount?: number;
     headerTitle?: string;
+    handleCalendarPress?: ()=> void;
+    handleNotificationPress?: () => void;
+    handleSearchPress?: () => void;
 }
 
 
-const Header: React.FC<ScreenHeaderProps> = ({ user, notificationCount, headerTitle }) => {
+const Header: React.FC<ScreenHeaderProps> = ({ user, notificationCount, headerTitle, handleCalendarPress, handleNotificationPress, handleSearchPress }) => {
 
     const router = useRouter();
     // const navigation = useNavigation();
@@ -65,13 +68,13 @@ const Header: React.FC<ScreenHeaderProps> = ({ user, notificationCount, headerTi
             }
 
             <HStack space={5} alignItems="center">
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleSearchPress}>
                     <AntDesign name="search1" size={20} color={COLORS.white} />
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleNotificationPress}>
                     <Ionicons name="notifications-outline" size={20} color={COLORS.white} />
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleCalendarPress}>
                     <Ionicons name="today-outline" size={20} color={COLORS.white} />
                 </TouchableOpacity>
             </HStack>

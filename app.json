@@ -51,6 +51,17 @@
           "enableMicrophonePermission": true,
           "microphonePermissionText": "$(PRODUCT_NAME) needs access to your Microphone."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./local/assets/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": [
+            "./local/assets/notification-sound.wav",
+            "./local/assets/notification-sound-other.wav"
+          ]
+        }
       ]
     ],
     "experiments": {

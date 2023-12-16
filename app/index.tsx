@@ -23,7 +23,7 @@ const Index = () => {
   
   const [isFirstLaunch, setIsFirstLaunch] = React.useState(false);
 
-  // console.log(user, authState?.authenticated , 'initialized')
+  // console.log(user, authState?.authenticated , 'see index file')
 
   // console.log(user, 'user contextssss')
 
@@ -67,10 +67,10 @@ const Index = () => {
 
     const inAuthGroup = segments[0] === "(auth)";
 
-    if (!user && isNavigationReady) {
+    if (!authState?.authenticated && inAuthGroup) {
       // Redirect to the login page.
       router.replace("/onboardingScreen");
-    } else if (user && authState?.authenticated) {
+    } else if (authState?.authenticated) {
       // go to tabs root.
       router.push("/(tabs)/home");
     }
