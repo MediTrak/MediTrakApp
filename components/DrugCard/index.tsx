@@ -6,7 +6,7 @@ import { COLORS } from "../../constants";
 type Props = {
     drug: string | undefined;
     drugTwo?: string | undefined;
-    time?: string | undefined;
+    time?: any;
     noOfTablets: number | undefined;
     noOfTabletTwo?: number | undefined;
 };

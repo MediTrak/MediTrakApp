@@ -3,7 +3,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import Header from '../../../components/Header';
 import AddMedication from '../../../components/Screens/AddMedication';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS } from "../../../constants";
+import { COLORS, FONT, SIZES } from "../../../constants";
 import { useAuth } from "../../context/auth";
 import DailyGoalCard from '../../../components/DailyGoalCard';
 import { avatarLetters } from '../../../utils';
@@ -13,14 +13,24 @@ import { useCallback, useEffect, useState } from 'react';
 import React from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import NowCard from '../../../components/NowCard';
-import { HStack } from 'native-base';
+// import { HStack, useToast } from 'native-base';
 import { extractTimeFromDate } from '../../../utils';
 import * as Notifications from 'expo-notifications';
+import { useToast, VStack, HStack, IconButton, CloseIcon, Alert, Icon } from 'native-base';
+
+interface ToastItem {
+  title: string;
+  variant: string;
+  description: string;
+  isClosable?: boolean;
+}
 
 export default function Home() {
   const { resp } = useLocalSearchParams();
 
-  const { user, authState, onGetMedications } = useAuth()
+  const toast = useToast();
+
+  const { user } = useAuth()
 
   const firstName = user?.firstName
   const lastName = user?.lastName
@@ -36,11 +46,60 @@ export default function Home() {
 
   const { data: medication, isLoading, isFetching, error, refetch, isSuccess } = useGetMedicationQuery({});
 
-  console.log(medication, isSuccess, error, 'see medication')
+  // console.log(medication, isSuccess, error, 'see medication')
 
   const medicationData = medication?.data || [];
 
   const [refreshing, setRefreshing] = useState(false);
+
+  const ToastAlert: React.FC<ToastItem & { id: string, status?: string, duration: number }> = ({
+    id,
+    status,
+    variant,
+    title,
+    description,
+    isClosable,
+    duration,
+    ...rest
+  }) => (
+    <Alert
+      maxWidth="95%"
+      alignSelf="center"
+      flexDirection="row"
+      status={status ? status : "info"}
+      variant={variant}
+      {...rest}
+    >
+      <VStack space={1} flexShrink={1} w="100%">
+        <HStack flexShrink={1} alignItems="center" justifyContent="space-between">
+          <HStack space={2} flexShrink={1} alignItems="center">
+            <Alert.Icon />
+            <Text style={styles.alertTitleText}>
+              {title}
+            </Text>
+          </HStack>
+          {isClosable ? (
+            <IconButton
+              variant="unstyled"
+              icon={<CloseIcon size="3" />}
+              _icon={{
+                color: variant === "solid" ? "lightText" : "darkText"
+              }}
+              onPress={() => toast.close(id)}
+            />
+          ) : null}
+        </HStack>
+        <Text style={styles.alertTitleText}>
+          {description}
+        </Text>
+      </VStack>
+    </Alert>
+  );
+
+  if (!isSuccess) {
+    console.log("Jwt expired")
+    // router.push("/login");
+  }
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -67,7 +126,7 @@ export default function Home() {
         }
 
       } catch (error) {
-        console.error('Error fetching hotels:', error);
+        console.error('Error fetching medication:', error);
         // Handle error if needed
       }
     }
@@ -81,7 +140,7 @@ export default function Home() {
 
   // console.log(extractTimeFromDate(currentTime), 'see extracted time')
 
-  // console.log(filteredData, 'see filtered Data')
+  console.log(filteredData, 'see filtered Data')
 
   let hasFilteredData = filteredData?.length > 0;
 
@@ -95,6 +154,135 @@ export default function Home() {
       trigger: { seconds: 10 },
     });
   }
+
+  const convertToTime = (timeArray: string[] | undefined): Date[] | undefined => {
+    return timeArray?.map((item) => {
+      const [hours, minutes] = item.split(':');
+      const time = new Date();
+      time.setHours(Number(hours) + 1);
+      time.setMinutes(Number(minutes));
+      time.setSeconds(0);
+      return time;
+    });
+  };
+
+  const filteredTimes = filteredData.map(entry => ({
+    id: entry._id,
+    timeToTake: convertToTime(entry.timeToTake)
+  }));
+
+  // console.log(filteredTimes, 'see filtered times')
+
+  const getNextTimeToTake = (entry: any): { _id: string, nextTime: Date | null } => {
+
+    const currentDay = currentTime.toISOString().split('T')[0];
+
+    if (entry.timeToTake && entry.timeToTake.length > 0) {
+      const convertedTimes = convertToTime(entry.timeToTake);
+
+      // Filter out times that are in the past and on previous days
+      const futureTimes = convertedTimes?.filter(time => {
+        const timeDay = time.toISOString().split('T')[0];
+        return time > currentTime && timeDay === currentDay;
+      });
+
+      // Sort the future times in ascending order
+      futureTimes?.sort((a: any, b: any) => a - b);
+
+      // Get the next time or null if there is none
+      const nextTime = futureTimes?.[0] || null;
+
+      return {
+        _id: entry._id,
+        nextTime
+      };
+    }
+
+    // Return null if no timeToTake array is present
+    return {
+      _id: entry._id,
+      nextTime: null
+    };
+  };
+
+  const nextTimes = filteredData.map(getNextTimeToTake);
+
+  const nextTimeArray = nextTimes.map(({ _id, nextTime }) => ({
+    id: _id,
+    nextTime: nextTime
+  }));
+
+  console.log(nextTimeArray, 'Next Time Array');
+
+  const formatTime = (date: Date | null | undefined): string => {
+    if (!date) {
+      return '';
+    }
+
+    const options: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true, timeZone: 'UTC' };
+    const formattedTime = new Intl.DateTimeFormat('en-US', options).format(date);
+
+    return formattedTime.replace(/:00$/, '')
+  };
+
+  // async function scheduleNotification(nextTimeArray: any) {
+  //   for (const { id, nextTime } of nextTimeArray) {
+  //     const notificationTime = new Date(nextTime);
+
+  //     await Notifications.scheduleNotificationAsync({
+  //       content: {
+  //         title: 'Take your Drug',
+  //         body: 'Here is the notification body',
+  //         data: { data: 'goes here', url: '/home' },
+  //       },
+  //       trigger: { date: notificationTime },
+  //     });
+  //   }
+  // }
+
+  // const nextArray = [
+  //   { id: '1', nextTime: '2023-12-17T03:05:00.000Z' },
+  //   { id: '2', nextTime: '2023-12-17T10:30:00.000Z' },
+  // ]
+
+  // scheduleNotification(nextArray)
+
+
+  const nextArray = [
+    { id: '1', nextTime: '2023-12-17T04:00:00.000Z' },
+    { id: '2', nextTime: '2023-12-17T10:30:00.000Z' },
+    // ... other entries
+  ];
+
+  // async function scheduleNotification(id: string, nextTime: string | number | Date) {
+  //   const notificationTime = new Date(nextTime);
+
+  //   await Notifications.scheduleNotificationAsync({
+  //     content: {
+  //       title: 'Take your Drug',
+  //       body: 'Here is the notification body',
+  //       data: { data: 'goes here', url: '/home' },
+  //     },
+  //     trigger: { date: notificationTime },
+  //   });
+  // }
+
+  // async function checkAndScheduleNotifications() {
+
+  //   for (const { id, nextTime } of nextArray) {
+  //     const notificationTime = new Date(nextTime);
+
+  //     if (notificationTime > currentTime) {
+  //       await scheduleNotification(id, notificationTime);
+  //     }
+  //   }
+  // }
+
+  // // Register the background task
+  // Notifications.registerTaskAsync('checkAndScheduleNotifications');
+
+  // // Schedule notifications when the app starts
+  // checkAndScheduleNotifications();
 
   return (
     <SafeAreaView style={{
@@ -143,7 +331,7 @@ export default function Home() {
                 <DrugCard
                   key={item._id}
                   drug={item.name}
-                  time={item.timeToTake?.[0]}
+                  time={formatTime(nextTimeArray.find(({ id }) => id === item._id)?.nextTime)}
                   noOfTablets={item.timesDaily}
                 />
               ))
@@ -216,5 +404,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     right: 20
+  },
+  alertTitleText: {
+    fontSize: SIZES.medium,
+    color: COLORS.white,
+    fontFamily: FONT.bold,
   }
 });

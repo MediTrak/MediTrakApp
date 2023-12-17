@@ -58,7 +58,7 @@ export default function Planner() {
       try {
         // await refetch();
       } catch (error) {
-        console.error('Error fetching hotels:', error);
+        console.error('Error fetching medication:', error);
         // Handle error if needed
       }
     }
