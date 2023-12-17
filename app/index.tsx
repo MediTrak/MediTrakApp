@@ -4,8 +4,11 @@ import { View, ActivityIndicator, Text } from "react-native";
 import { COLORS } from "../constants";
 import { useAuth } from "./context/auth";
 import { storeLaunchData, getLaunchData } from "../utils";
+import * as SecureStore from 'expo-secure-store';
 
 const HAS_LAUNCHED = 'hasLaunched';
+const TOKEN_KEY = 'user-token';
+const USER = "user-info";
 
 const Index = () => {
 
@@ -23,9 +26,26 @@ const Index = () => {
 
   const [isFirstLaunch, setIsFirstLaunch] = React.useState(false);
 
-  console.log(user, authState?.authenticated , 'see index file')
+  // console.log(user, authState?.authenticated , 'see index file')
 
   // console.log(segments[0], 'see segments')
+
+  // React.useEffect(() => {
+  //   const loadToken = async () => {
+  //     try {
+  //       const userToken = await SecureStore.getItemAsync(TOKEN_KEY)
+  //       const userInfo = await SecureStore.getItemAsync(USER)
+
+  //       // console.log(userInfo, 'user info secure store index file')
+  //       // console.log(userToken, 'token from secure store index file')
+
+  //     } catch (error) {
+  //       console.error("Error fetching token or user info:", error);
+  //       // Handle the error, perhaps setAuthState to indicate an error state
+  //     }
+  //   }
+  //   loadToken();
+  // }, [])
 
   React.useEffect(() => {
     const checkFirstLaunch = async () => {

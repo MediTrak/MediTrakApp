@@ -55,7 +55,8 @@
     "expo-notifications": "~0.20.1",
     "expo-device": "~5.4.0",
     "expo-constants": "~14.4.2",
-    "expo-local-authentication": "~13.4.1"
+    "expo-local-authentication": "~13.4.1",
+    "expo-background-fetch": "~11.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

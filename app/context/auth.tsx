@@ -34,14 +34,14 @@ export interface UserResponse {
 }
 
 interface AuthProps {
-  authState?: { token: string | null; authenticated: boolean | null };
+  authState?: { token: string | null; authenticated: boolean | null; user: User | null | undefined };
   onRegister?: (email: string, password: string, firstName: string, lastName: string) => Promise<any>;
   onConfirm?: (confirmationToken: string) => Promise<any>;
   onLogin?: (email: string, password: string) => Promise<any>;
   onLogout?: () => Promise<any>;
   onForgot?: (email: string) => Promise<any>;
   onReset?: (newPassword: string, confirmPassword: string) => Promise<any>;
-  user?: User | null;
+  user?: User | null | undefined;
   setUser?: (user: User | null) => void;
   isLoggedIn?: boolean;
   initialized?: boolean;
@@ -68,12 +68,14 @@ export const AuthProvider = ({ children }: any) => {
   const [authState, setAuthState] = useState<{
     token: string | null;
     authenticated: boolean | null;
-    user?: User | null;
+    user: User | null;
   }>({
     token: null,
     authenticated: null,
     user: null
   });
+
+  // console.log(authState.user, authState.token, authState.authenticated, 'see authState in context outside useEffect')
 
   useEffect(() => {
     const loadToken = async () => {
@@ -98,8 +100,6 @@ export const AuthProvider = ({ children }: any) => {
           }
 
           dispatch(setCredentials(userLogin))
-
-          // console.log(userLogin, 'userLogin from secure store auth file to be dispatched')
 
         } else {
           setAuthState({
@@ -230,7 +230,8 @@ export const AuthProvider = ({ children }: any) => {
 
       setAuthState({
         token: null,
-        authenticated: false
+        authenticated: false,
+        user: null
       });
 
       return { user: null, error: null };
@@ -391,7 +392,7 @@ export const AuthProvider = ({ children }: any) => {
     onForgot: forgotPassword,
     onReset: resetPassword,
     authState,
-    user: authState ? authState.user : null,
+    user: authState.user,
     onAddMedication: addMedication,
     onGetMedication: getMedications,
     onEditMedication: editMedication,

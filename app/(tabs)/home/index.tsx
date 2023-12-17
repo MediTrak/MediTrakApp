@@ -13,10 +13,12 @@ import { useCallback, useEffect, useState } from 'react';
 import React from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import NowCard from '../../../components/NowCard';
-// import { HStack, useToast } from 'native-base';
 import { extractTimeFromDate } from '../../../utils';
 import * as Notifications from 'expo-notifications';
 import { useToast, VStack, HStack, IconButton, CloseIcon, Alert, Icon } from 'native-base';
+import * as BackgroundFetch from 'expo-background-fetch';
+import * as TaskManager from 'expo-task-manager';
+import { BackgroundFetchStatus } from 'expo-background-fetch';
 
 interface ToastItem {
   title: string;
@@ -24,6 +26,20 @@ interface ToastItem {
   description: string;
   isClosable?: boolean;
 }
+
+const BACKGROUND_FETCH_TASK = 'background-fetch';
+
+// 1. Define the task by providing a name and the function that should be executed
+// Note: This needs to be called in the global scope (e.g outside of your React components)
+TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+  const now = Date.now();
+
+  console.log(`Got background fetch call at date: ${new Date(now).toISOString()}`);
+
+  // Be sure to return the successful result type!
+  return BackgroundFetch.BackgroundFetchResult.NewData;
+});
+
 
 export default function Home() {
   const { resp } = useLocalSearchParams();
@@ -97,7 +113,7 @@ export default function Home() {
   );
 
   if (!isSuccess) {
-    console.log("Jwt expired")
+    console.log(isSuccess,":", error)
     // router.push("/login");
   }
 
@@ -140,7 +156,7 @@ export default function Home() {
 
   // console.log(extractTimeFromDate(currentTime), 'see extracted time')
 
-  console.log(filteredData, 'see filtered Data')
+  // console.log(filteredData, 'see filtered Data')
 
   let hasFilteredData = filteredData?.length > 0;
 
@@ -212,7 +228,7 @@ export default function Home() {
     nextTime: nextTime
   }));
 
-  console.log(nextTimeArray, 'Next Time Array');
+  // console.log(nextTimeArray, 'Next Time Array');
 
   const formatTime = (date: Date | null | undefined): string => {
     if (!date) {
@@ -222,7 +238,10 @@ export default function Home() {
     const options: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true, timeZone: 'UTC' };
     const formattedTime = new Intl.DateTimeFormat('en-US', options).format(date);
 
-    return formattedTime.replace(/:00$/, '')
+    // return formattedTime.replace(/:00$/, '')
+
+    return formattedTime.replace(/:(00)(?=\s|$)/, '');
+
   };
 
   // async function scheduleNotification(nextTimeArray: any) {
@@ -284,6 +303,34 @@ export default function Home() {
   // // Schedule notifications when the app starts
   // checkAndScheduleNotifications();
 
+  async function registerBackgroundFetchAsync() {
+    return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+      minimumInterval: 60 * 15, // 15 minutes
+      stopOnTerminate: false, // android only,
+      startOnBoot: true, // android only
+    });
+  }
+
+  const [isRegistered, setIsRegistered] = React.useState(false);
+  const [status, setStatus] = React.useState<BackgroundFetchStatus | null>(null);
+
+  React.useEffect(() => {
+    checkStatusAsync();
+  }, []);
+
+  const checkStatusAsync = async () => {
+    const status = await BackgroundFetch.getStatusAsync();
+    const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_FETCH_TASK);
+    setStatus(status);
+    setIsRegistered(isRegistered);
+  }
+
+
+  const toggleFetchTask = async () => {
+    await registerBackgroundFetchAsync();
+    checkStatusAsync();
+  };
+
   return (
     <SafeAreaView style={{
       flex: 1, justifyContent: "flex-start", alignItems: "center"
@@ -324,6 +371,11 @@ export default function Home() {
             <Button
               title="Schedule test notifications"
               onPress={schedulePushNotification}
+            />
+
+            <Button
+              title={'Register BackgroundFetch task'}
+              onPress={toggleFetchTask}
             />
 
             {
