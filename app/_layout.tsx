@@ -11,6 +11,8 @@ import { Linking, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { Camera } from 'react-native-vision-camera';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -73,6 +75,16 @@ function RootLayoutNav() {
     useState<Notifications.Notification>();
   const notificationListener = useRef<Notifications.Subscription>();
   const responseListener = useRef<Notifications.Subscription>();
+  const [showCamera, setShowCamera] = useState(false);
+
+  useEffect(() => {
+    async function getPermission() {
+      const newCameraPermission = await Camera.requestCameraPermission();
+      setShowCamera(true)
+      console.log('see camera permission:', newCameraPermission);
+    }
+    getPermission();
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -167,13 +179,15 @@ function RootLayoutNav() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NativeBaseProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false
-          }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-        </Stack>
+        <BottomSheetModalProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false
+            }}>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          </Stack>
+        </BottomSheetModalProvider>
       </NativeBaseProvider>
     </GestureHandlerRootView>
   );

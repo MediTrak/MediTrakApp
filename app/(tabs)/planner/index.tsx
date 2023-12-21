@@ -1,15 +1,17 @@
-import { ScrollView, StatusBar, StyleSheet, View, Text, TouchableOpacity, Platform, Modal, ActivityIndicator, RefreshControl, Image, Share } from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, View, Text, TouchableOpacity, Platform, Modal, ActivityIndicator, RefreshControl, Image, Share, Button } from 'react-native';
 import { Stack, useRouter } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, FONT, SIZES } from '../../../constants';
 import Header from '../../../components/Header';
 import PlanDrugCard from '../../../components/Planner-Drug-Cards';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useGetMedicationQuery } from '../../services/mediTrakApi';
 import BottomSheetComponent from '../../../components/BottomSheet';
 import { HStack, VStack, useToast, IconButton, CloseIcon, Alert } from 'native-base';
 import { useAuth } from "../../context/auth";
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { FlashList } from "@shopify/flash-list";
 
 interface DrugData {
   _id: string;
@@ -72,7 +74,14 @@ export default function Planner() {
   // variables
   const snapPoints = useMemo(() => ['30%'], []);
 
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
   const handleToggleBottomSheet = (id: string) => {
+    handlePresentModalPress()
     setBottomSheetOpen((prevIds) => ({
       ...prevIds,
       [id]: !prevIds[id], // Toggle the value for the given id
@@ -135,13 +144,13 @@ export default function Planner() {
 
   const handleModalClose = (id: string) => {
     setModalVisible((prev) => ({ ...prev, [id]: false }));
-    // console.log('Closing Modal for:', id);
+    console.log('Closing Modal for:', id);
   };
 
   const handleEdit = (id: string) => {
     router.push({ pathname: "/medication-form", params: { id: id } });
     setModalVisible((prev) => ({ ...prev, [id]: false }));
-    // console.log('Edit button pressed for ID:', id);
+    console.log('Edit button pressed for ID:', id);
   };
 
   const handleShare = (id: string) => {
@@ -180,145 +189,152 @@ export default function Planner() {
     }
 
     return;
-};
+  };
 
-const shareReport = async () => {
-  try {
-    const result = await Share.share({
-      title: "Download Adherence Report",
-      message: "Download Adherence Report to monitor your usage",
-    });
-    if (result.action === Share.sharedAction) {
-      if (result.activityType) {
-        console.log('Shared with activity type of: ', result.activityType);
-      } else {
-        console.log('Shared successfully');
+  const shareReport = async () => {
+    try {
+      const result = await Share.share({
+        title: "Download Adherence Report",
+        message: "Download Adherence Report to monitor your usage",
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log('Shared with activity type of: ', result.activityType);
+        } else {
+          console.log('Shared successfully');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // Handle dismissal
       }
-    } else if (result.action === Share.dismissedAction) {
-      // Handle dismissal
+    } catch (error) {
+      console.error('Error sharing:', error);
     }
-  } catch (error) {
-    console.error('Error sharing:', error);
-  }
-};
+  };
 
-const socials = [
-  {
-    id: '1',
-    image: require('../../../assets/images/whatsApp.png'),
-    title: 'WhatsApp',
-  },
-  {
-    id: '2',
-    image: require('../../../assets/images/instagram.png'),
-    title: 'Instagram',
-  },
-  {
-    id: '3',
-    image: require('../../../assets/images/twitter.png'),
-    title: 'Twitter',
-  },
-  {
-    id: '4',
-    image: require('../../../assets/images/facebook.png'),
-    title: 'Facebook',
-  },
-];
+  const socials = [
+    {
+      id: '1',
+      image: require('../../../assets/images/whatsApp.png'),
+      title: 'WhatsApp',
+    },
+    {
+      id: '2',
+      image: require('../../../assets/images/instagram.png'),
+      title: 'Instagram',
+    },
+    {
+      id: '3',
+      image: require('../../../assets/images/twitter.png'),
+      title: 'Twitter',
+    },
+    {
+      id: '4',
+      image: require('../../../assets/images/facebook.png'),
+      title: 'Facebook',
+    },
+  ];
 
-return (
-  <SafeAreaView style={styles.container}>
-    <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
-    <Stack.Screen options={{ headerShown: false, title: "Planner" }} />
-    <Header headerTitle='Planner' />
-    <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%', padding: 20 }}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <Text style={{
-        fontSize: 14, fontWeight: '600', color: "#2a2a2a",
-        textAlign: "left", marginBottom: 20
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
+      <Stack.Screen options={{ headerShown: false, title: "Planner" }} />
+      <Header headerTitle='Planner' />
+      <View style={{ flex: 1, width: '100%' }}>
+        <FlashList
+          data={medicationData}
+          keyExtractor={(item) => item._id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ padding: 20 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          ListHeaderComponent={() => (
+            <Text style={{
+              fontSize: 14, fontWeight: '600', color: "#2a2a2a",
+              textAlign: "left", marginBottom: 20
+            }}>
+              All Medications
+            </Text>
+          )}
+          renderItem={({ item }: { item: DrugData }) => (
+            <PlanDrugCard
+              key={item._id}
+              drug={item.name}
+              noOfTablets={item.timesDaily}
+              startDate={item.fromWhen.toString().split('T')[0]}
+              endDate={item.tillWhen.toString().split('T')[0]}
+              dosage={item.dosage.split('-')[0]}
+              backgroundColor={item.timesDaily === 1 ? '#1C49B429' : (item.timesDaily === 2 ? '#F7876429' : '#2F8C1829')}
+              textColor={item.timesDaily === 1 ? '#1C49B4' : (item.timesDaily === 2 ? '#F78764CC' : '#2F8C18')}
+              onModalOpen={() => handleModalOpen(item._id)}
+              onEditPress={() => handleEdit(item._id)}
+              onSharePress={() => handleShare(item._id)}
+              onDeletePress={() => handleDelete(item._id)}
+              onModalClose={() => handleModalClose(item._id)}
+              modalVisible={modalVisible[item._id] || false}
+            />
+          )}
+          estimatedItemSize={50}
+        />
+      </View>
+
+
+
+      <TouchableOpacity style={styles.button} onPress={() => {
+        router.push("/medication-form");
       }}>
-        All Medications
-      </Text>
+        <MaterialCommunityIcons name='plus' size={30} color={'white'} />
+      </TouchableOpacity>
 
       {medicationData.map((data: DrugData) => (
-        <PlanDrugCard
+
+        <BottomSheetComponent
+          // initialIndex={bottomSheetOpen[data._id] ? 0 : -1}
+          snapPoints={snapPoints}
+          id={data._id}
           key={data._id}
-          drug={data.name}
-          noOfTablets={data.timesDaily}
-          startDate={data.fromWhen.toString().split('T')[0]}
-          endDate={data.tillWhen.toString().split('T')[0]}
-          dosage={data.dosage.split('-')[0]}
-          backgroundColor={data.timesDaily === 1 ? '#1C49B429' : (data.timesDaily === 2 ? '#F7876429' : '#2F8C1829')}
-          textColor={data.timesDaily === 1 ? '#1C49B4' : (data.timesDaily === 2 ? '#F78764CC' : '#2F8C18')}
-          onModalOpen={() => handleModalOpen(data._id)}
-          onEditPress={() => handleEdit(data._id)}
-          onSharePress={() => handleShare(data._id)}
-          onDeletePress={() => handleDelete(data._id)}
-          onModalClose={() => handleModalClose(data._id)}
-          // modalVisible={modalVisible}
-          modalVisible={modalVisible[data._id] || false}
-        />
-      ))}
-    </ScrollView>
-
-    <TouchableOpacity style={styles.button} onPress={() => {
-      router.push("/medication-form");
-    }}>
-      <MaterialCommunityIcons name='plus' size={30} color={'white'} />
-    </TouchableOpacity>
-
-    {medicationData.map((data: DrugData) => (
-
-      <BottomSheetComponent
-        initialIndex={bottomSheetOpen[data._id] ? 0 : -1}
-        snapPoints={snapPoints}
-        id={data._id}
-        key={data._id}
-      >
-        <View style={styles.contentContainer}>
-          <HStack justifyContent={'space-between'} style={{ width: '100%' }}>
-            <Text style={styles.shareReport}>Share Report</Text>
-            {/* <TouchableOpacity>
+          ref={bottomSheetModalRef}
+        >
+          <View style={styles.contentContainer}>
+            <HStack justifyContent={'space-between'} style={{ width: '100%' }}>
+              <Text style={styles.shareReport}>Share Report</Text>
+              {/* <TouchableOpacity>
               <MaterialCommunityIcons name='close' size={24}/>
             </TouchableOpacity> */}
-          </HStack>
-          <TouchableOpacity onPress={shareReport} style={{ width: '100%' }} >
-            <HStack justifyContent={'space-between'} style={styles.downloadBtn}>
-              <HStack>
-                <Image
-                  source={require('../../../assets/images/adobe.png')}
-                  fadeDuration={0}
-                  style={{ width: 24, height: 24, marginRight: 8 }}
-                />
-                <Text style={styles.medReport}>Medication Usage Report</Text>
-              </HStack>
-              <TouchableOpacity onPress={shareReport}>
-                <MaterialCommunityIcons name='download' size={24} />
-              </TouchableOpacity>
             </HStack>
-          </TouchableOpacity>
-          <HStack style={{ width: '100%', gap: 10 }}>
-            {socials.map((item, index) => (
-              <VStack justifyContent={'center'} alignItems={'center'}>
-                <TouchableOpacity key={index} style={{ padding: 8, backgroundColor: '#FBFBFB', borderRadius: 50 }}>
+            <TouchableOpacity onPress={shareReport} style={{ width: '100%' }} >
+              <HStack justifyContent={'space-between'} style={styles.downloadBtn}>
+                <HStack>
                   <Image
-                    source={item.image}
+                    source={require('../../../assets/images/adobe.png')}
                     fadeDuration={0}
-                    style={{ width: 24, height: 24 }}
+                    style={{ width: 24, height: 24, marginRight: 8 }}
                   />
+                  <Text style={styles.medReport}>Medication Usage Report</Text>
+                </HStack>
+                <TouchableOpacity onPress={shareReport}>
+                  <MaterialCommunityIcons name='download' size={24} />
                 </TouchableOpacity>
+              </HStack>
+            </TouchableOpacity>
+            <HStack style={{ width: '100%', gap: 10 }}>
+              {socials.map((item, index) => (
+                <VStack justifyContent={'center'} alignItems={'center'}>
+                  <TouchableOpacity key={index} style={{ padding: 8, backgroundColor: '#FBFBFB', borderRadius: 50 }}>
+                    <Image
+                      source={item.image}
+                      fadeDuration={0}
+                      style={{ width: 24, height: 24 }}
+                    />
+                  </TouchableOpacity>
 
-                <Text style={styles.socialText}>{item.title}</Text>
-              </VStack>))}
-          </HStack>
-        </View>
-      </BottomSheetComponent>
+                  <Text style={styles.socialText}>{item.title}</Text>
+                </VStack>))}
+            </HStack>
+          </View>
+        </BottomSheetComponent>
 
-    ))}
-  </SafeAreaView>
-);
+      ))}
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -326,7 +342,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingBottom: 10
+    paddingBottom: 10,
+    width: '100%',
   },
 
   button: {

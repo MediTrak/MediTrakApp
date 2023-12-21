@@ -73,7 +73,7 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
                 <Text style={{ color: COLORS.gray3, fontSize: 14, fontWeight: "500" }}>End: {endDate}</Text>
             </HStack>
 
-            <Modal
+            {/* <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible}
@@ -111,7 +111,7 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
                         )}
                     </View>
                 </View>
-            </Modal>
+            </Modal> */}
         </VStack>
     );
 };
@@ -119,6 +119,7 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
         justifyContent: 'space-between',
         width: '100%',
         paddingHorizontal: 20,

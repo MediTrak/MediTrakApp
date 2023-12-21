@@ -19,6 +19,7 @@ import { useToast, VStack, HStack, IconButton, CloseIcon, Alert, Icon } from 'na
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
 import { BackgroundFetchStatus } from 'expo-background-fetch';
+import { FlashList } from '@shopify/flash-list';
 
 interface ToastItem {
   title: string;
@@ -113,7 +114,7 @@ export default function Home() {
   );
 
   if (!isSuccess) {
-    console.log(isSuccess,":", error)
+    console.log(isSuccess, ":", error)
     // router.push("/login");
   }
 
@@ -153,8 +154,6 @@ export default function Home() {
   const time = new Date(Date.now());
 
   const currentTime = new Date(time.getTime() + 60 * 60 * 1000);
-
-  // console.log(extractTimeFromDate(currentTime), 'see extracted time')
 
   // console.log(filteredData, 'see filtered Data')
 
@@ -352,9 +351,7 @@ export default function Home() {
       ) : (
 
         hasFilteredData ? (
-          <ScrollView showsVerticalScrollIndicator={false} style={[styles.drugCardsWrapper, { marginTop: 40 }]} refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }>
+          <View style={[styles.drugCardsWrapper, { marginTop: 40 }]}>
 
             <HStack justifyContent={'space-between'} alignItems={'center'} style={{ width: '100%' }}>
               <Text style={styles.upcomingText}>Now</Text>
@@ -363,10 +360,13 @@ export default function Home() {
               </Text>
             </HStack>
 
-            <NowCard drug='Paracetamol' drugTwo='Puritin' noOfTablets={3} buttonText='Show Evidence' handlePress={() =>
-              router.push("/add-evidence")} />
-
-            <Text style={styles.upcomingText}>Upcoming</Text>
+            <NowCard
+              drug='Paracetamol'
+              drugTwo='Puritin'
+              noOfTablets={3}
+              buttonText='Show Evidence'
+              handlePress={() => router.push("/add-evidence")}
+            />
 
             <Button
               title="Schedule test notifications"
@@ -378,17 +378,31 @@ export default function Home() {
               onPress={toggleFetchTask}
             />
 
-            {
-              filteredData?.map((item: { _id: React.Key | null | undefined; name: string | undefined; timeToTake: string[] | undefined; timesDaily: number | undefined; }) => (
+            <FlashList
+              data={filteredData}
+              keyExtractor={(item) => item._id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingVertical: 20 }}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+              ListHeaderComponent={() => (
+                <Text style={{
+                  fontSize: 14, fontWeight: '600', color: "#2a2a2a",
+                  textAlign: "left", marginBottom: 20
+                }}>
+                  Upcoming
+                </Text>
+              )}
+              renderItem={({ item }: { item: any }) => (
                 <DrugCard
                   key={item._id}
                   drug={item.name}
                   time={formatTime(nextTimeArray.find(({ id }) => id === item._id)?.nextTime)}
                   noOfTablets={item.timesDaily}
                 />
-              ))
-            }
-          </ScrollView>
+              )}
+              estimatedItemSize={50}
+            />
+          </View>
         ) : (
           <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, width: "100%" }} contentContainerStyle={{ alignItems: 'center', flex: 1, justifyContent: 'center' }} refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -425,7 +439,7 @@ const styles = StyleSheet.create({
 
   drugCardsWrapper: {
     // borderColor: 'red',
-    // borderWidth: 1,
+    flex: 1,
     width: '100%',
     paddingHorizontal: 20,
     paddingTop: 10,

@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 
 
-export default function AddEvidence() {
+export default function Notifications() {
     const navigation = useNavigation();
 
     return (

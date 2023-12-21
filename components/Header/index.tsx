@@ -18,29 +18,6 @@ interface ScreenHeaderProps {
 const Header: React.FC<ScreenHeaderProps> = ({ user, notificationCount, headerTitle, handleCalendarPress, handleNotificationPress, handleSearchPress }) => {
 
     const router = useRouter();
-    // const navigation = useNavigation();
-
-    // // Effect
-    // useEffect(() => {
-    //     navigation.addListener('beforeRemove', (e) => {
-    //         e.preventDefault();
-    //         // Alert.alert("Cannot go back from here. Sign in again")
-    //         navigation.dispatch(e.data.action);
-    //     });
-    // }, []);
-
-    // useEffect(() => {
-    //     const handleBackPress = () => {
-    //         BackHandler.exitApp();
-    //         return true;
-    //     };
-
-    //     BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-
-    //     return () => {
-    //         BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
-    //     };
-    // }, []); // Empty dependency array means this effect runs once
 
     return (
         <HStack style={styles.header} alignItems="center" justifyContent="space-between">
@@ -71,10 +48,10 @@ const Header: React.FC<ScreenHeaderProps> = ({ user, notificationCount, headerTi
                 <TouchableOpacity onPress={handleSearchPress}>
                     <AntDesign name="search1" size={20} color={COLORS.white} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleNotificationPress}>
+                <TouchableOpacity onPress={() => { router.push("/notifications")}}>
                     <Ionicons name="notifications-outline" size={20} color={COLORS.white} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleCalendarPress}>
+                <TouchableOpacity onPress={() => { router.push("/calendar") }}>
                     <Ionicons name="today-outline" size={20} color={COLORS.white} />
                 </TouchableOpacity>
             </HStack>

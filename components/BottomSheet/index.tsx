@@ -1,11 +1,20 @@
 // BottomSheetComponent.js
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { forwardRef, useCallback, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import BottomSheet from '@gorhom/bottom-sheet';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 
-const BottomSheetComponent = ({ initialIndex, snapPoints, children , id }: any) => {
+type Ref = BottomSheetModal
+
+interface Props {
+    initialIndex?: number;
+    snapPoints: any[]; 
+    children: React.ReactNode;
+    id?: string; 
+}
+
+const BottomSheetComponent = forwardRef<Ref, Props>(( props, ref ) => {
     // ref
-    const bottomSheetRef = useRef<BottomSheet>(null);
+    const bottomSheetRef = useRef<BottomSheetModal>(null);
 
     // callbacks
     const handleSheetChanges = useCallback((index: number) => {
@@ -14,18 +23,18 @@ const BottomSheetComponent = ({ initialIndex, snapPoints, children , id }: any) 
 
     // renders
     return (
-        <BottomSheet
-            ref={bottomSheetRef}
-            index={initialIndex}
-            snapPoints={snapPoints}
+        <BottomSheetModal
+            ref={ref}
+            index={0}
+            snapPoints={props.snapPoints}
             onChange={handleSheetChanges}
             enablePanDownToClose={true}
-            key={id}
+            key={props.id}
         >
-            {children}
-        </BottomSheet>
+            {props.children}
+        </BottomSheetModal>
     );
-};
+});
 
 const styles = StyleSheet.create({
     contentContainer: {
