@@ -2,8 +2,7 @@ import { Text, View, StyleSheet, Image, TouchableOpacity, BackHandler } from "re
 import { COLORS } from "../../constants";
 import { HStack } from 'native-base';
 import { Ionicons, AntDesign, Octicons } from '@expo/vector-icons';
-import { useNavigation, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useRouter } from "expo-router";
 
 interface ScreenHeaderProps {
     user?: string | undefined;

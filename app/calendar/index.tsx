@@ -1,5 +1,5 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, TouchableOpacity, View, Text, Platform, Image, Linking, RefreshControl, ActivityIndicator } from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, TouchableOpacity, View, Text, Platform, Image, Linking, RefreshControl, ActivityIndicator, FlatList } from 'react-native';
 import { Stack, useNavigation } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../constants';
@@ -138,7 +138,7 @@ export default function CalendarScreen() {
     const marked = useMemo(() => {
         return {
             [getDate(-1)]: {
-                dotColor: 'red',
+                dotColor: COLORS.primary,
                 marked: true
             },
             [selected]: {
@@ -164,7 +164,7 @@ export default function CalendarScreen() {
                     theme={{
                         calendarBackground: COLORS.white,
                         dayTextColor: COLORS.primary,
-                        todayTextColor: 'white',
+                        todayTextColor: COLORS.primary,
                         selectedDayTextColor: COLORS.lightWhite,
                         indicatorColor: COLORS.primary,
                         arrowColor: COLORS.primary,
@@ -202,30 +202,32 @@ export default function CalendarScreen() {
                 {isLoading || isFetching ? (
                     <ActivityIndicator size='large' color={COLORS.primary} />
                 ) : (
-                    <FlashList
-                        data={filteredData}
-                        keyExtractor={(item) => item._id}
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ paddingVertical: 20 }}
-                        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-                        ListHeaderComponent={() => (
-                            <Text style={{
-                                fontSize: 14, fontWeight: '600', color: "#2a2a2a",
-                                textAlign: "left", marginBottom: 20
-                            }}>
-                                Daily Goal
-                            </Text>
-                        )}
-                        renderItem={({ item }: { item: any }) => (
-                            <DrugCard
-                                key={item._id}
-                                drug={item.name}
-                                time={formatTime(nextTimeArray.find(({ id }) => id === item._id)?.nextTime)}
-                                noOfTablets={item.timesDaily}
-                            />
-                        )}
-                        estimatedItemSize={50}
-                    />
+                    <>
+                        <FlashList
+                            data={filteredData}
+                            keyExtractor={(item) => item._id}
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={{ paddingVertical: 20 }}
+                            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                            ListHeaderComponent={() => (
+                                <Text style={{
+                                    fontSize: 14, fontWeight: '600', color: "#2a2a2a",
+                                    textAlign: "left", marginBottom: 20
+                                }}>
+                                    Daily Goal
+                                </Text>
+                            )}
+                            renderItem={({ item }: { item: any }) => (
+                                <DrugCard
+                                    key={item._id}
+                                    drug={item.name}
+                                    time={formatTime(nextTimeArray.find(({ id }) => id === item._id)?.nextTime)}
+                                    noOfTablets={item.timesDaily}
+                                />
+                            )}
+                            estimatedItemSize={50}
+                        />
+                    </>
                 )}
             </View>
         </SafeAreaView>
