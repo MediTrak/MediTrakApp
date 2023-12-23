@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useRouter } from "expo-router";
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import { NewArticleCard, OldArticleCard } from '../ArticleCard';
-import { FlashList } from "@shopify/flash-list";
 
 const newData = [
     {
@@ -74,14 +73,13 @@ const Articles = () => {
                 showsHorizontalScrollIndicator={false}
             />
 
-            <View style={{ flex: 1, width: '100%' }}>
-                <FlashList
+                <FlatList
                     data={newData}
                     keyExtractor={(item) => item.id}
                     numColumns={2}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: 40 }}
-                    // style={{ gap: 10, columnGap: 10}}
+                    columnWrapperStyle= {{ gap: 10}}
                     ListHeaderComponent={() => (
                         <Text style={{
                             fontSize: 14, fontWeight: '600', color: "#2a2a2a",
@@ -104,12 +102,8 @@ const Articles = () => {
                             backgroundColor={item.category === 'Health' ? '#E6BA5C14' : '#2B617D14'}
                         />
                     )}
-
-                    estimatedItemSize={50}
+                    scrollEnabled={false}
                 />
-            </View>
-
-
         </View>
     );
 };

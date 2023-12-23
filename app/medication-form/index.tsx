@@ -30,6 +30,17 @@ interface ToastItem {
     isClosable?: boolean;
 }
 
+interface Errors {
+    medicationName: string;
+    dailyUsageNoOfTimes: string;
+    usageTime: string;
+    tabletsPerUsage: string;
+    startDate: string;
+    endDate: string;
+    usageTimes: string[];
+    selectedValue?: string;
+};
+
 export default function MedicationForm() {
     const router = useRouter();
 
@@ -76,14 +87,14 @@ export default function MedicationForm() {
 
     const { medicationName, dailyUsageNoOfTimes, usageTime, tabletsPerUsage, startDate, endDate } = formData;
 
-    const [errors, setErrors] = useState({
+    const [errors, setErrors] = useState<Errors>({
         medicationName: '',
         dailyUsageNoOfTimes: '',
         usageTime: '',
         tabletsPerUsage: '',
         startDate: '',
         endDate: '',
-        usageTimes: ''
+        usageTimes: []
     });
 
     const [selectedValue, setSelectedValue] = useState<string>(`${dailyUsageNoOfTimes}`);
@@ -146,10 +157,10 @@ export default function MedicationForm() {
         } else { //cancel Button
             return null
         }
-        setErrors((prevErrors) => ({
-            ...prevErrors,
-            [index]: '',
-        }));
+
+        console.log('Before state update:', errors.usageTimes);
+        setErrors(errors => ({ ...errors, [`usageTimes[${index}]`]: '' }));
+        console.log('After state update:', errors.usageTimes);
     };
 
     useEffect(() => {
@@ -182,12 +193,12 @@ export default function MedicationForm() {
             // If the same value is clicked again, unselect it
             setSelectedValue('');
             setFormData({ ...formData, 'dailyUsageNoOfTimes': '' });
-            setErrors(prevErrors => ({ ...prevErrors, 'hospital': 'Hospital is required' }));
+            setErrors(prevErrors => ({ ...prevErrors, 'dailyUsageNoOfTime': 'Daily Usage Number of Times is required' }));
         } else {
             // If a different value is selected, update the state
             setSelectedValue(value);
             setFormData({ ...formData, 'dailyUsageNoOfTimes': value });
-            setErrors(prevErrors => ({ ...prevErrors, 'hospital': '' }));
+            setErrors(prevErrors => ({ ...prevErrors, 'dailyUsageNoOfTimes': '' }));
             setUsageTimes([]);
         }
     };
@@ -250,7 +261,7 @@ export default function MedicationForm() {
 
     const validateInputs = () => {
         let validationPassed = true;
-        const newErrors = { medicationName: '', dailyUsageNoOfTimes: '', usageTime: '', tabletsPerUsage: '', startDate: '', endDate: '', usageTimes: '', selectedValue: '' };
+        const newErrors: Errors = { medicationName: '', dailyUsageNoOfTimes: '', usageTime: '', tabletsPerUsage: '', startDate: '', endDate: '', usageTimes: [], selectedValue: '' };
 
         if (!medicationName.trim()) {
             newErrors.medicationName = 'Medication Name is required';
@@ -262,9 +273,24 @@ export default function MedicationForm() {
             validationPassed = false;
         }
 
-        if (usageTimes.length != parseFloat(dailyUsageNoOfTimes)) {
-            newErrors.usageTime = 'Time is required';
-            validationPassed = false;
+        if (parseFloat(dailyUsageNoOfTimes) > usageTimes.length) {
+            for (let i = usageTimes.length; i < parseFloat(dailyUsageNoOfTimes); i++) {
+                newErrors.usageTimes[i] = `Usage time is required`;
+                validationPassed = false;
+            }
+        } else if (usageTimes.length > 1) {
+            usageTimes.forEach((currentTime, index) => {
+                if (index > 0) {
+                    const previousTime = usageTimes[index - 1];
+                    if (!currentTime) {
+                        newErrors.usageTimes[index] = `Usage time is required`;
+                        validationPassed = false;
+                    } else if (currentTime <= previousTime) {
+                        newErrors.usageTimes[index] = `Usage time cannot be before or same as the previous usage time`;
+                        validationPassed = false;
+                    }
+                }
+            });
         }
 
         if (tabletsPerUsage == 0) {
@@ -288,6 +314,8 @@ export default function MedicationForm() {
         setErrors(newErrors);
         return validationPassed;
     };
+
+    // console.log(errors.usageTimes, 'errors')
 
     const handleSubmit = async () => {
         if (validateInputs()) {
@@ -405,7 +433,7 @@ export default function MedicationForm() {
                     mt="1"
                     mb="1"
                     fontSize="14"
-                    // defaultValue={selectedValue}
+                // defaultValue={selectedValue}
                 >
                     <Select.Item label="Once" value="1" />
                     <Select.Item label="Twice" value="2" />
@@ -480,15 +508,15 @@ export default function MedicationForm() {
                                             style={styles.textInput}
                                             underlineColorAndroid="transparent"
                                             placeholderTextColor="#2A2A2A24"
-                                            value={extractTimeFromDate(usageTimes[index])}
+                                            value={usageTimes[index] ? extractTimeFromDate(usageTimes[index]) : undefined}
                                             editable={false}
                                         />
                                         <TouchableOpacity onPress={() => showUsage(index)}>
                                             <AntDesign name="clockcircleo" size={16} color={'#2A2A2A'} />
                                         </TouchableOpacity>
                                     </View>
-                                    <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
-                                        {errors.usageTime && <Text style={styles.errorText}>{errors.usageTime}</Text>}
+                                    <HStack alignItems={'center'} style={{ minHeight: 18 }}>
+                                        {errors.usageTimes[index] && <Text style={styles.errorText}>{errors.usageTimes[index]}</Text>}
                                     </HStack>
 
                                     {showUsageTime[index] && (
@@ -546,7 +574,7 @@ export default function MedicationForm() {
                                     <Ionicons name="today-outline" size={16} color={'#2A2A2A'} />
                                 </TouchableOpacity>
                             </View>
-                            <HStack justifyContent={'space-between'} alignItems={'flex-start'} style={{ height: 36 }}>
+                            <HStack justifyContent={'space-between'} alignItems={'flex-start'} style={{ minHeight: 36 }}>
                                 {errors.startDate && <Text style={styles.errorText}>{errors.startDate}</Text>}
                             </HStack>
 
@@ -579,10 +607,10 @@ export default function MedicationForm() {
                                     <Ionicons name="today-outline" size={16} color={'#2A2A2A'} />
                                 </TouchableOpacity>
                             </View>
-                            <HStack justifyContent={'space-between'} alignItems={'flex-start'} style={{ height: 36 }}>
+                            <HStack justifyContent={'space-between'} alignItems={'flex-start'} style={{ minHeight: 36 }}>
                                 {errors.endDate && <Text style={styles.errorText}>{errors.endDate}</Text>}
                             </HStack>
-                            
+
                             {showPickerEndDate && (
                                 <DateTimePicker
                                     testID="dateTimePicker"

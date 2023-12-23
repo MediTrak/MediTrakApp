@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "expo-router";
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, StyleSheet } from "react-native";
-import { FlashList } from "@shopify/flash-list";
-import { WebinarCard } from "../WebinarCard";
+import { WebinarCard, RegisteredWebinarCard } from "../WebinarCard";
 
 const newData = [
     {
@@ -65,13 +64,17 @@ const Webinars = () => {
 
             <FlatList
                 data={newData}
-                renderItem={({ item }) => (
-                    <WebinarCard
+                renderItem={({ item, index }) => (
+                    <RegisteredWebinarCard
                         img={item.image}
                         title={item.title}
                         time={item.time}
                         handleCardPress={handleCardPress}
                         selectedWebinar={selectedWebinar}
+                        webinarType={item.webinarType}
+                        date={"22nd Dec"}
+                        daysLeft={"2 days left"}
+                        backgroundColor={index % 2 === 1 ? "#DB520229" : "#6C656429"}
                     />
                 )}
                 keyExtractor={(item) => item.id}
@@ -79,11 +82,34 @@ const Webinars = () => {
                 horizontal
                 showsHorizontalScrollIndicator={false}
             />
-            <View style={{ flex: 1, width: '100%' }}>
-
-            </View>
-
-
+            <FlatList
+                data={newData}
+                keyExtractor={(item) => item.id}
+                numColumns={2}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 40 }}
+                columnWrapperStyle={{ gap: 10 }}
+                ListHeaderComponent={() => (
+                    <Text style={{
+                        fontSize: 14, fontWeight: '600', color: "#2a2a2a",
+                        textAlign: "left", marginBottom: 10, marginTop: 20
+                    }}>
+                        Older
+                    </Text>
+                )}
+                renderItem={({ item }) => (
+                    <WebinarCard
+                        img={item.image}
+                        title={item.title}
+                        time={item.time}
+                        handleCardPress={handleCardPress}
+                        selectedWebinar={selectedWebinar}
+                        webinarType={item.webinarType}
+                    />
+                )}
+                scrollEnabled={false}
+            />
+            
         </View>
     );
 };

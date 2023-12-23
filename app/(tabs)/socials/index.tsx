@@ -7,6 +7,7 @@ import Header from '../../../components/Header';
 import { Tabs, MaterialTabBar } from 'react-native-collapsible-tab-view';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 import Articles from '../../../components/Articles';
+import Webinars from '../../../components/Webinars';
 
 const HeaderComp = () => {
   return <Header headerTitle='Socials' />
@@ -63,7 +64,18 @@ const ArticlesRoute = () => (
 );
 
 const WebinarsRoute = () => (
-  <View style={{ flex: 1, backgroundColor: '#673ab7' }} />
+  <SafeAreaView style={[styles.container, { paddingHorizontal: 20 }]}>
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <View style={styles.scrollInnerContainer}>
+        <Text style={{
+          fontSize: 14, fontWeight: '600', color: "#2a2a2a",
+          textAlign: "left"
+        }}>
+          Registered
+        </Text>
+      </View>
+    </ScrollView>
+  </SafeAreaView>
 );
 
 const renderScene = SceneMap({
@@ -120,7 +132,8 @@ export default function Socials() {
               contentContainerStyle={{
                 width: 'auto',
                 paddingHorizontal: 20,
-                gap: 12
+                gap: 12,
+                // backgroundColor: 'red'
               }}
               labelStyle={{
                 fontSize: 12,
@@ -133,7 +146,6 @@ export default function Socials() {
       >
         <Tabs.Tab name="Articles" label="Articles">
           <Tabs.ScrollView showsVerticalScrollIndicator={false} style={{ padding: 20, backgroundColor: COLORS.white }}>
-
             <Text style={{
               fontSize: 14, fontWeight: '600', color: "#2a2a2a",
               textAlign: "left"
@@ -145,7 +157,13 @@ export default function Socials() {
         </Tabs.Tab>
         <Tabs.Tab name="Webinars" label="Webinars">
           <Tabs.ScrollView showsVerticalScrollIndicator={false} style={{ padding: 20, backgroundColor: COLORS.white }}>
-
+            <Text style={{
+              fontSize: 14, fontWeight: '600', color: "#2a2a2a",
+              textAlign: "left"
+            }}>
+              Registered
+            </Text>
+            <Webinars />
           </Tabs.ScrollView>
         </Tabs.Tab>
       </Tabs.Container>

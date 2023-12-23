@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { COLORS } from '../../constants';
 import { Avatar } from "native-base";
 import { StyleSheet, TouchableWithoutFeedback, Text, TouchableOpacity } from 'react-native';
-import { Ionicons, AntDesign, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 type AvatarComponentProps = {
     avatar: string | undefined;
@@ -18,7 +18,7 @@ const AvatarBtn: React.FunctionComponent<AvatarComponentProps> = ({ avatar, hand
             >
                 <Text style={{fontSize: 90, color: COLORS.white }}>{avatar}</Text>
                 <TouchableOpacity onPress={handlePress}>
-                    <MaterialIcons name='edit' size={20} color={ COLORS.white } style={styles.editIcon}/>
+                    <FontAwesome5 name="user-edit" size={12} color={ COLORS.white } style={styles.editIcon} />
                 </TouchableOpacity>
             </Avatar>
         </TouchableWithoutFeedback>
@@ -29,9 +29,9 @@ const styles = StyleSheet.create({
     editIcon: {
         position: 'absolute',
         right: -70,
-        bottom: -23,
-        borderRadius: 50,
-        padding: 5,
+        bottom: -18,
+        borderRadius: 100,
+        padding: 6,
         backgroundColor: 'rgba(0, 0, 0, 0.3)'
     }
 })

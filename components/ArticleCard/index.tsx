@@ -152,7 +152,8 @@ const styles = StyleSheet.create<Styles | any>({
     },
 
     oldContainer: (selectedArticle: string, item: { id: string; }) => ({
-        width: width * 0.41,
+        width: width * 0.43,
+        // flexBasis: '45%',
         padding: 12,
         borderColor: '#2A2A2A12',
         borderWidth: 1,
@@ -161,7 +162,7 @@ const styles = StyleSheet.create<Styles | any>({
         ...SHADOWS.medium,
         shadowColor: COLORS.white,
         marginBottom: 12,
-        marginRight: 12,
+        // marginRight: 12,
         gap: 6
     }),
 
@@ -173,7 +174,8 @@ const styles = StyleSheet.create<Styles | any>({
     imageOld: {
         width: '100%',
         objectFit: 'fill',
-        flex: 1
+        flex: 1,
+        borderRadius: 4
     }
 })
 
