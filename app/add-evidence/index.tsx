@@ -5,8 +5,9 @@ import { COLORS } from '../../constants';
 import { HStack } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import BottomSheetComponent from '../../components/BottomSheet';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Camera, useCameraDevice, useCameraDevices } from 'react-native-vision-camera';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 export default function AddEvidence() {
     const navigation = useNavigation();
@@ -19,14 +20,14 @@ export default function AddEvidence() {
     const [showCamera, setShowCamera] = useState(false);
     const [imageSource, setImageSource] = useState('');
 
-    useEffect(() => {
-        async function getPermission() {
-            const newCameraPermission = await Camera.requestCameraPermission();
-            setShowCamera(true)
-            console.log('see camera permission:', newCameraPermission );
-        }
-        getPermission();
-    }, []);
+    // useEffect(() => {
+    //     async function getPermission() {
+    //         const newCameraPermission = await Camera.requestCameraPermission();
+    //         setShowCamera(true)
+    //         console.log('see camera permission:', newCameraPermission );
+    //     }
+    //     getPermission();
+    // }, []);
 
     const capturePhoto = async () => {
         if (camera.current !== null) {
@@ -46,10 +47,16 @@ export default function AddEvidence() {
     // variables
     const snapPoints = useMemo(() => ['50%'], []);
 
+    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
     // handlers
-    const handleToggleBottomSheet = () => {
-        setBottomSheetOpen(prevState => !prevState);
-    };
+    // const handleToggleBottomSheet = () => {
+    //     setBottomSheetOpen(prevState => !prevState);
+    // };
+
+    const handlePresentModalPress = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+      }, []);
 
     return (
         <SafeAreaView style={{ flex: 1, justifyContent: "flex-start", alignItems: "center", paddingTop: Platform.OS == "android" ? StatusBar.currentHeight : 0, paddingBottom: 20 }}>
@@ -99,7 +106,7 @@ export default function AddEvidence() {
 
             <View style={{ width: '100%', paddingHorizontal: 20, marginTop: 20 }}>
                 <TouchableOpacity style={styles.loginBtn}
-                    onPress={handleToggleBottomSheet}>
+                    onPress={handlePresentModalPress}>
                     <Text style={styles.loginBtnText}>Send Photo</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.loginBtn, { backgroundColor: '#18305914' }]}
@@ -109,8 +116,9 @@ export default function AddEvidence() {
             </View>
 
             <BottomSheetComponent
-                initialIndex={bottomSheetOpen ? 0 : -1}
+                // initialIndex={bottomSheetOpen ? 0 : -1}
                 snapPoints={snapPoints}
+                ref={bottomSheetModalRef}
             >
                 <View style={styles.contentContainer}>
                     <Image

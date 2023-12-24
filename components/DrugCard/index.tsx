@@ -6,7 +6,7 @@ import { COLORS } from "../../constants";
 type Props = {
     drug: string | undefined;
     drugTwo?: string | undefined;
-    time?: string | undefined;
+    time?: any;
     noOfTablets: number | undefined;
     noOfTabletTwo?: number | undefined;
 };
@@ -15,14 +15,17 @@ const DrugCard: React.FunctionComponent<Props> = ({ drug, drugTwo, time, noOfTab
     return (
         <VStack style={styles.container}>
             <HStack justifyContent={'space-between'} alignItems={'center'} style={{ width: '100%' }}>
-                <Text style={{ fontSize: 14, color: COLORS.gray3, textAlign: 'left', fontWeight: '500' }}>{drug} <Text style={{ fontSize: 14, color: COLORS.gray2, fontWeight: '400' }}>({noOfTablets} tablet)</Text></Text>
+                <VStack>
+                    <Text style={{ fontSize: 14, color: COLORS.gray3, textAlign: 'left', fontWeight: '500' }}>{drug}</Text>
+                    <Text style={{ fontSize: 14, color: COLORS.gray2, fontWeight: '400' }}>({noOfTablets} tablet)</Text>
+                </VStack>
                 <Text style={{ fontSize: 11, color: COLORS.gray3, fontWeight: '600' }}>
                     {time}
                 </Text>
             </HStack>
-            <View style={{ width: '100%', marginTop: 6 }}>
+            {/* <View style={{ width: '100%', marginTop: 6 }}>
                 <Text style={{ fontSize: 14, color: COLORS.gray3, textAlign: 'left', fontWeight: '500' }}>{drugTwo} <Text style={{ fontSize: 14, color: COLORS.gray2, fontWeight: '400' }}>({noOfTablets} tablet)</Text></Text>
-            </View>
+            </View> */}
 
         </VStack>
     )

@@ -11,7 +11,6 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import DateTimePicker, { Event } from '@react-native-community/datetimepicker';
 import React from "react";
 import { useAuth } from "../context/auth";
-import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { useGetMedicationQuery } from '../services/mediTrakApi';
 
 interface FormData {
@@ -31,6 +30,17 @@ interface ToastItem {
     isClosable?: boolean;
 }
 
+interface Errors {
+    medicationName: string;
+    dailyUsageNoOfTimes: string;
+    usageTime: string;
+    tabletsPerUsage: string;
+    startDate: string;
+    endDate: string;
+    usageTimes: string[];
+    selectedValue?: string;
+};
+
 export default function MedicationForm() {
     const router = useRouter();
 
@@ -42,18 +52,13 @@ export default function MedicationForm() {
 
     const medicationData = medication?.data || [];
 
-    const filteredMedicationData = medicationData.filter((entry: { _id: string | string[]; }) => entry._id === id)
-
-    console.log(filteredMedicationData, 'filtered medication data')
+    const filteredMedicationData: any = medicationData.filter((entry: { _id: string | string[]; }) => entry._id === id)
 
     const navigation = useNavigation();
     const [show, setShow] = useState(false);
     const handleClick = () => setShow(!show);
     const [isLoading, setLoading] = useState(false);
     const toast = useToast();
-
-    // const [date, setDate] = useState(new Date());
-    const [mode, setMode] = useState('date');
 
     const today = new Date();
 
@@ -78,40 +83,27 @@ export default function MedicationForm() {
         endDate: endMedicationDate || today
     });
 
-
     const [spinner, setSpinner] = useState(false);
 
     const { medicationName, dailyUsageNoOfTimes, usageTime, tabletsPerUsage, startDate, endDate } = formData;
 
-    console.log(id, medicationName, dailyUsageNoOfTimes, 'id and filtered from planner');
-
-    const [errors, setErrors] = useState({
+    const [errors, setErrors] = useState<Errors>({
         medicationName: '',
         dailyUsageNoOfTimes: '',
         usageTime: '',
         tabletsPerUsage: '',
         startDate: '',
         endDate: '',
-        usageTimes: ''
+        usageTimes: []
     });
 
-    console.log(dailyUsageNoOfTimes, 'daily usage number of times')
-
-    const [selectedValue, setSelectedValue] = useState<string>(dailyUsageNoOfTimes);
-
-    const timeOptions = Array.from({ length: 24 }, (_, index) => {
-        const hour = index < 10 ? `0${index}` : `${index}`;
-        return {
-            label: `${hour}:00`,
-            value: `${index}:00`,
-        };
-    });
+    const [selectedValue, setSelectedValue] = useState<string>(`${dailyUsageNoOfTimes}`);
 
     const [showPickerStartDate, setShowPickerStartDate] = useState(false);
 
     const [showPickerEndDate, setShowPickerEndDate] = useState(false);
 
-    const [showUsageTime, setShowUsageTime] = useState(false);
+    const [showUsageTime, setShowUsageTime] = useState<{ [index: number]: boolean }>({});
 
     const dailyUsageNumberValue: number = parseInt(dailyUsageNoOfTimes, 10) as number;
 
@@ -119,7 +111,7 @@ export default function MedicationForm() {
         return timeArray?.map((time) => {
             const [hours, minutes] = time?.split(':');
             const date = new Date();
-            date.setHours(Number(hours));
+            date.setHours(Number(hours) + 1);
             date.setMinutes(Number(minutes));
             date.setSeconds(0);
             return date;
@@ -128,13 +120,9 @@ export default function MedicationForm() {
 
     const dateArray = convertToDates(filteredMedicationData[0]?.timeToTake || []);
 
-    console.log(dateArray, selectedValue, 'time from backend');
-
     const [usageTimes, setUsageTimes] = useState<Date[]>(dateArray || []);
 
-    const [time, setTime] = useState(new Date(1598051730000));
-
-    console.log(usageTimes, selectedValue, 'usageTimes')
+    const [time, setTime] = useState(new Date(Date.now()));
 
     const onChangeStartDate = (event: any, selectedDate: any) => {
         const currentDate = selectedDate;
@@ -151,19 +139,28 @@ export default function MedicationForm() {
     };
 
     const onChangeUsageTime = (event: any, selectedTime: any, index: number) => {
-        const currentTime = selectedTime;
-        setShowUsageTime(false);
+        const currentTime = new Date(selectedTime.getTime() + 60 * 60 * 1000);
+        setShowUsageTime((prev) => ({ ...prev, [index]: false }));
 
-        setUsageTimes([...usageTimes, currentTime]);
+        if (event.type == "set") { //ok button
+            // Check if the index already exists in the array
+            if (index < usageTimes.length) {
+                // If it exists, replace the value at that index
+                const updatedUsageTimes = [...usageTimes];
+                updatedUsageTimes[index] = currentTime;
+                setUsageTimes(updatedUsageTimes);
+            } else {
+                // If it doesn't exist, add the new value to the end of the array
+                setUsageTimes([...usageTimes, currentTime]);
+            }
+            setTime(selectedTime);
+        } else { //cancel Button
+            return null
+        }
 
-        // setUsageTimes(prevUsageTimes => [...prevUsageTimes, currentTime]);
-        setTime(currentTime)
-
-        setErrors((prevErrors) => ({
-            ...prevErrors,
-            [index]: '',
-        }));
-
+        console.log('Before state update:', errors.usageTimes);
+        setErrors(errors => ({ ...errors, [`usageTimes[${index}]`]: '' }));
+        console.log('After state update:', errors.usageTimes);
     };
 
     useEffect(() => {
@@ -177,8 +174,7 @@ export default function MedicationForm() {
         return () => {
             BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
         };
-    }, [navigation]); // Include navigation in the dependency array
-
+    }, [navigation]);
 
     const showDatepickerStart = () => {
         setShowPickerStartDate(true);
@@ -189,7 +185,7 @@ export default function MedicationForm() {
     };
 
     const showUsage = (index: number) => {
-        setShowUsageTime(true);
+        setShowUsageTime((prev) => ({ ...prev, [index]: true }));
     };
 
     const handleValueChange = (value: string) => {
@@ -197,12 +193,12 @@ export default function MedicationForm() {
             // If the same value is clicked again, unselect it
             setSelectedValue('');
             setFormData({ ...formData, 'dailyUsageNoOfTimes': '' });
-            setErrors(prevErrors => ({ ...prevErrors, 'hospital': 'Hospital is required' }));
+            setErrors(prevErrors => ({ ...prevErrors, 'dailyUsageNoOfTime': 'Daily Usage Number of Times is required' }));
         } else {
             // If a different value is selected, update the state
             setSelectedValue(value);
             setFormData({ ...formData, 'dailyUsageNoOfTimes': value });
-            setErrors(prevErrors => ({ ...prevErrors, 'hospital': '' }));
+            setErrors(prevErrors => ({ ...prevErrors, 'dailyUsageNoOfTimes': '' }));
             setUsageTimes([]);
         }
     };
@@ -265,21 +261,36 @@ export default function MedicationForm() {
 
     const validateInputs = () => {
         let validationPassed = true;
-        const newErrors = { medicationName: '', dailyUsageNoOfTimes: '', usageTime: '', tabletsPerUsage: '', startDate: '', endDate: '', usageTimes: '' };
+        const newErrors: Errors = { medicationName: '', dailyUsageNoOfTimes: '', usageTime: '', tabletsPerUsage: '', startDate: '', endDate: '', usageTimes: [], selectedValue: '' };
 
         if (!medicationName.trim()) {
             newErrors.medicationName = 'Medication Name is required';
             validationPassed = false;
         }
 
-        if (!dailyUsageNoOfTimes.trim()) {
+        if (!selectedValue.trim()) {
             newErrors.dailyUsageNoOfTimes = 'Daily Usage Number of Times is required';
             validationPassed = false;
         }
 
-        if (usageTimes.length != parseFloat(dailyUsageNoOfTimes)) {
-            newErrors.usageTime = 'Time is required';
-            validationPassed = false;
+        if (parseFloat(dailyUsageNoOfTimes) > usageTimes.length) {
+            for (let i = usageTimes.length; i < parseFloat(dailyUsageNoOfTimes); i++) {
+                newErrors.usageTimes[i] = `Usage time is required`;
+                validationPassed = false;
+            }
+        } else if (usageTimes.length > 1) {
+            usageTimes.forEach((currentTime, index) => {
+                if (index > 0) {
+                    const previousTime = usageTimes[index - 1];
+                    if (!currentTime) {
+                        newErrors.usageTimes[index] = `Usage time is required`;
+                        validationPassed = false;
+                    } else if (currentTime <= previousTime) {
+                        newErrors.usageTimes[index] = `Usage time cannot be before or same as the previous usage time`;
+                        validationPassed = false;
+                    }
+                }
+            });
         }
 
         if (tabletsPerUsage == 0) {
@@ -304,6 +315,8 @@ export default function MedicationForm() {
         return validationPassed;
     };
 
+    // console.log(errors.usageTimes, 'errors')
+
     const handleSubmit = async () => {
         if (validateInputs()) {
 
@@ -324,8 +337,6 @@ export default function MedicationForm() {
                 user: '',
                 id: drugId
             };
-
-            console.log(medicationParams, 'medication params')
 
             if (isEdit) {
                 const result = await onEditMedication!(medicationParams.medicationName, medicationParams.dailyUsageNoOfTimes, medicationParams.usageTime, medicationParams.tabletsPerUsage, medicationParams.startDate, medicationParams.endDate, medicationParams.id)
@@ -383,7 +394,7 @@ export default function MedicationForm() {
                 const goBackWithDelay = () => {
                     setTimeout(() => {
                         navigation.goBack();
-                    }, 2000); // 2000 milliseconds or 2 seconds
+                    }, 1000); // 2000 milliseconds or 2 seconds
                 };
 
                 goBackWithDelay();
@@ -417,12 +428,12 @@ export default function MedicationForm() {
                     selectedValue={selectedValue}
                     _selectedItem={{
                         bg: COLORS.primary,
-                        endIcon: <CheckIcon size={5}/>
+                        endIcon: <CheckIcon size={5} />
                     }}
                     mt="1"
                     mb="1"
                     fontSize="14"
-                    defaultValue={selectedValue}
+                // defaultValue={selectedValue}
                 >
                     <Select.Item label="Once" value="1" />
                     <Select.Item label="Twice" value="2" />
@@ -473,20 +484,6 @@ export default function MedicationForm() {
                         <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
                             {errors.medicationName && <Text style={styles.errorText}>{errors.medicationName}</Text>}
                         </HStack>
-
-
-                        {/* <Input
-                            placeholder="Enter Medication"
-                            autoCapitalize="none"
-                            nativeID="medicationName"
-                            onChange={(value) => handleChangeInput('medicationName', value)}
-                            containerStyle={styles.textInput}
-                            inputContainerStyle={styles.inputContainer}
-                            errorMessage={errors.medicationName}
-                            label="Name of Medication"
-                            labelStyle={styles.label}
-                            value={medicationName}
-                        /> */}
                     </View>
 
                     <VStack style={[styles.innerContainers]}>
@@ -511,53 +508,24 @@ export default function MedicationForm() {
                                             style={styles.textInput}
                                             underlineColorAndroid="transparent"
                                             placeholderTextColor="#2A2A2A24"
-                                            value={extractTimeFromDate(usageTimes[index])}
+                                            value={usageTimes[index] ? extractTimeFromDate(usageTimes[index]) : undefined}
                                             editable={false}
                                         />
                                         <TouchableOpacity onPress={() => showUsage(index)}>
                                             <AntDesign name="clockcircleo" size={16} color={'#2A2A2A'} />
                                         </TouchableOpacity>
                                     </View>
-                                    <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
-                                        {errors.usageTime && <Text style={styles.errorText}>{errors.usageTime}</Text>}
+                                    <HStack alignItems={'center'} style={{ minHeight: 18 }}>
+                                        {errors.usageTimes[index] && <Text style={styles.errorText}>{errors.usageTimes[index]}</Text>}
                                     </HStack>
-                                    {/* <Input
-                                        placeholder="9:00pm"
-                                        nativeID={`usageTime_${index}`}
-                                        onChange={(value) => handleChangeInput(`usageTime_${index}`, value, index)}
-                                        containerStyle={{ width: '100%', paddingHorizontal: 0, paddingLeft: 20 }}
-                                        inputContainerStyle={{
-                                            borderWidth: 1,
-                                            borderColor: COLORS.gray,
-                                            borderRadius: 8,
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            width: '100%',
-                                            paddingHorizontal: 8,
-                                        }}
-                                        rightIcon={
-                                            <TouchableOpacity onPress={() => showUsage(index)}>
-                                                <AntDesign name="clockcircleo" size={16} color={'#2A2A2A'} />
-                                            </TouchableOpacity>
-                                        }
-                                        rightIconContainerStyle={{
-                                            height: 'auto'
-                                        }}
-                                        errorMessage={errors.usageTime}
-                                        value={extractTimeFromDate(usageTimes[index])}
-                                        editable={false}
-                                    /> */}
 
-                                    {showUsageTime && (
-                                        <RNDateTimePicker
-                                            testID={`dateTimePicker_${index}`}
+                                    {showUsageTime[index] && (
+                                        <DateTimePicker
+                                            key={index}
                                             value={time}
                                             mode='time'
                                             is24Hour={true}
                                             onChange={(event, date) => onChangeUsageTime(event, date, index)}
-                                            minimumDate={startDate}
-                                            minuteInterval={30}
-                                            key={index}
                                             display="clock"
                                         />
                                     )}
@@ -585,20 +553,6 @@ export default function MedicationForm() {
                         <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
                             {errors.tabletsPerUsage && <Text style={styles.errorText}>{errors.tabletsPerUsage}</Text>}
                         </HStack>
-                        {/* <Input
-                            placeholder="Enter tablets per usage"
-                            autoCapitalize="none"
-                            nativeID="tabletsPerUsage"
-                            onChange={(value) => handleChangeInput('tabletsPerUsage', value)}
-                            containerStyle={styles.textInput}
-                            inputContainerStyle={styles.inputContainer}
-                            errorMessage={errors.tabletsPerUsage}
-                            label="How many tablet per usage"
-                            labelStyle={styles.label}
-                            inputMode="numeric"
-                            keyboardType="numeric"
-                            value={tabletsPerUsage.toString()}
-                        /> */}
                     </View>
 
                     <HStack style={[styles.innerContainers]} alignItems={'center'} justifyContent={'space-between'}>
@@ -620,35 +574,9 @@ export default function MedicationForm() {
                                     <Ionicons name="today-outline" size={16} color={'#2A2A2A'} />
                                 </TouchableOpacity>
                             </View>
-                            <HStack justifyContent={'space-between'} alignItems={'flex-start'} style={{ height: 36 }}>
+                            <HStack justifyContent={'space-between'} alignItems={'flex-start'} style={{ minHeight: 36 }}>
                                 {errors.startDate && <Text style={styles.errorText}>{errors.startDate}</Text>}
                             </HStack>
-                            {/* <Input
-                                placeholder="DD/MM/YYYY"
-                                nativeID="startDate"
-                                onChange={(value) => handleChangeInput('startDate', value)}
-                                containerStyle={{ width: '100%', paddingHorizontal: 0, paddingLeft: 20 }}
-                                inputContainerStyle={{
-                                    borderWidth: 1,
-                                    borderColor: COLORS.gray,
-                                    borderRadius: 8,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '100%',
-                                    paddingHorizontal: 8,
-                                }}
-                                rightIcon={
-                                    <TouchableOpacity onPress={showDatepickerStart}>
-                                        <Ionicons name="today-outline" size={16} color={'#2A2A2A'} />
-                                    </TouchableOpacity>
-                                }
-                                rightIconContainerStyle={{
-                                    height: 'auto'
-                                }}
-                                errorMessage={errors.startDate}
-                                value={startDate?.toISOString().split('T')[0]}
-                                editable={false}
-                            /> */}
 
                             {showPickerStartDate && (
                                 <DateTimePicker
@@ -679,35 +607,10 @@ export default function MedicationForm() {
                                     <Ionicons name="today-outline" size={16} color={'#2A2A2A'} />
                                 </TouchableOpacity>
                             </View>
-                            <HStack justifyContent={'space-between'} alignItems={'flex-start'} style={{ height: 36 }}>
+                            <HStack justifyContent={'space-between'} alignItems={'flex-start'} style={{ minHeight: 36 }}>
                                 {errors.endDate && <Text style={styles.errorText}>{errors.endDate}</Text>}
                             </HStack>
-                            {/* <Input
-                                placeholder="DD/MM/YYYY"
-                                nativeID="endDate"
-                                onChange={(value) => handleChangeInput('endDate', value)}
-                                containerStyle={{ width: '100%', paddingHorizontal: 0, paddingRight: 20 }}
-                                inputContainerStyle={{
-                                    borderWidth: 1,
-                                    borderColor: COLORS.gray,
-                                    borderRadius: 8,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '100%',
-                                    paddingHorizontal: 8,
-                                }}
-                                rightIcon={
-                                    <TouchableOpacity onPress={showDatepickerEnd}>
-                                        <Ionicons name="today-outline" size={16} color={'#2A2A2A'} />
-                                    </TouchableOpacity>
-                                }
-                                rightIconContainerStyle={{
-                                    height: 'auto'
-                                }}
-                                errorMessage={errors.endDate}
-                                value={endDate?.toISOString().split('T')[0]}
-                                editable={false}
-                            /> */}
+
                             {showPickerEndDate && (
                                 <DateTimePicker
                                     testID="dateTimePicker"
@@ -791,7 +694,7 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingVertical: 8,
         height: 40
-      },
+    },
     title: {
         fontSize: 18,
         lineHeight: 27,

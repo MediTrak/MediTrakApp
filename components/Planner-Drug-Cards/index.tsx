@@ -4,7 +4,7 @@ import { View, StyleSheet, Image, Text, Platform, TouchableOpacity, Alert, Modal
 import { COLORS } from "../../constants";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import Popover, { PopoverPlacement } from 'react-native-popover-view';
+// import Popover, { PopoverPlacement } from 'react-native-popover-view';
 
 
 type Props = {
@@ -19,6 +19,9 @@ type Props = {
     onDeletePress?: () => void;
     onModalClose?: () => void;
     modalVisible: boolean;
+    startDate: string;
+    endDate: string;
+    dosage?: string;
 };
 
 const PlanDrugCard: React.FunctionComponent<Props> = ({
@@ -32,7 +35,10 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
     onSharePress,
     onDeletePress,
     onModalClose,
-    modalVisible
+    modalVisible,
+    startDate,
+    endDate,
+    dosage
 }) => {
 
     const router = useRouter();
@@ -46,7 +52,7 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
     return (
         <VStack style={styles.container}>
             <HStack justifyContent={'space-between'} alignItems={'center'} style={{ width: '100%' }}>
-                <Text style={{ fontSize: 16, color: COLORS.gray3, textAlign: 'left', fontWeight: '500' }}>{drug} </Text>
+                <Text style={{ fontSize: 16, color: COLORS.primary, textAlign: 'left', fontWeight: '500' }}>{drug}</Text>
 
                 <TouchableOpacity
                     onPress={onModalOpen}
@@ -58,11 +64,16 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
 
             <HStack style={{ marginTop: 8 }}>
                 <View style={[styles.coloredText, { backgroundColor: backgroundColor }]}>
-                    <Text style={{ color: textColor, fontSize: 13, fontWeight: "600" }}>{noOfTablets} Daily</Text>
+                    <Text style={{ color: textColor, fontSize: 13, fontWeight: "600" }}>{dosage} {dosage === "1" ? "tablet" : "tablets"} {noOfTablets === 1 ? '' : noOfTablets} {noOfTablets === 1 ? 'Once' : 'Times'} Daily</Text>
                 </View>
             </HStack>
 
-            <Modal
+            <HStack style={{ marginTop: 10, marginRight: 12 }} justifyContent={'space-between'}>
+                <Text style={{ color: COLORS.gray3, fontSize: 14, fontWeight: "500" }}>Start: {startDate}</Text>
+                <Text style={{ color: COLORS.gray3, fontSize: 14, fontWeight: "500" }}>End: {endDate}</Text>
+            </HStack>
+
+            {/* <Modal
                 animationType="fade"
                 transparent={true}
                 visible={modalVisible}
@@ -100,7 +111,7 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
                         )}
                     </View>
                 </View>
-            </Modal>
+            </Modal> */}
         </VStack>
     );
 };
@@ -108,6 +119,7 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
         justifyContent: 'space-between',
         width: '100%',
         paddingHorizontal: 20,

@@ -3,24 +3,45 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { useRouter } from "expo-router";
 import { useDispatch } from 'react-redux';
+import { setCredentials } from '../services/authSlice';
+
+// interface User {
+//   firstName?: string;
+//   lastName?: string;
+//   email?: string;
+//   confirmed?: boolean;
+//   id: string;
+// }
 
 interface User {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  confirmed?: boolean;
+  firstName: string;
+  lastName: string;
+  email: string;
   id: string;
+  __v?: number;
+  confirmationTokenExpiry?: string;
+  confirmed?: boolean;
+  hospital?: {
+      name: string;
+  };
+  password?: string;
+  role?: string;
+}
+
+export interface UserResponse {
+  user: User;
+  token: string;
 }
 
 interface AuthProps {
-  authState?: { token: string | null; authenticated: boolean | null };
+  authState?: { token: string | null; authenticated: boolean | null; user: User | null | undefined };
   onRegister?: (email: string, password: string, firstName: string, lastName: string) => Promise<any>;
   onConfirm?: (confirmationToken: string) => Promise<any>;
   onLogin?: (email: string, password: string) => Promise<any>;
   onLogout?: () => Promise<any>;
   onForgot?: (email: string) => Promise<any>;
   onReset?: (newPassword: string, confirmPassword: string) => Promise<any>;
-  user?: User | null;
+  user?: User | null | undefined;
   setUser?: (user: User | null) => void;
   isLoggedIn?: boolean;
   initialized?: boolean;
@@ -29,6 +50,7 @@ interface AuthProps {
   onEditMedication?: (name: string, timesDaily: number, timeToTake: string[], dosage: string, fromWhen: string, tillWhen: string, id: string) => Promise<any>;
   onDeleteMedication?: (id: string) => Promise<any>;
   onConfirmForgot?: (resetToken: string) => Promise<any>;
+  onAcceptMedication?: (id: string) => Promise<any>;
 }
 
 const TOKEN_KEY = 'user-token';
@@ -46,12 +68,14 @@ export const AuthProvider = ({ children }: any) => {
   const [authState, setAuthState] = useState<{
     token: string | null;
     authenticated: boolean | null;
-    user?: User | null;
+    user: User | null;
   }>({
     token: null,
     authenticated: null,
     user: null
   });
+
+  // console.log(authState.user, authState.token, authState.authenticated, 'see authState in context outside useEffect')
 
   useEffect(() => {
     const loadToken = async () => {
@@ -69,6 +93,13 @@ export const AuthProvider = ({ children }: any) => {
             authenticated: true,
             user: storedUserInfo
           })
+
+          const userLogin: UserResponse = {
+            user: storedUserInfo,
+            token: userToken
+          }
+
+          dispatch(setCredentials(userLogin))
 
         } else {
           setAuthState({
@@ -174,7 +205,7 @@ export const AuthProvider = ({ children }: any) => {
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${result?.data.token}`
 
-      await SecureStore.setItemAsync(TOKEN_KEY, result.data.token)
+      await SecureStore.setItemAsync(TOKEN_KEY, token)
 
       await SecureStore.setItemAsync(USER, userObjectString);
 
@@ -199,7 +230,8 @@ export const AuthProvider = ({ children }: any) => {
 
       setAuthState({
         token: null,
-        authenticated: false
+        authenticated: false,
+        user: null
       });
 
       return { user: null, error: null };
@@ -236,8 +268,6 @@ export const AuthProvider = ({ children }: any) => {
   const addMedication = async (name: string, timesDaily: number, timeToTake: string[], dosage: string, fromWhen: string, tillWhen: string, user: string) => {
 
     const userToken = await SecureStore.getItemAsync(TOKEN_KEY);
-
-    console.log(userToken, 'see token auth')
 
     const config = {
       headers: {
@@ -306,7 +336,49 @@ export const AuthProvider = ({ children }: any) => {
 
       return { data: result.data, error: false };
     } catch (e) {
-      console.error(e, 'error delete medication');
+      console.error(e, 'error deleting medication');
+      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+    }
+
+  };
+
+  const acceptMedication = async (id: string) => {
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authState.token}`
+      }
+    };
+
+    try {
+
+      const result = await axios.get(`${API_URL}/api/medication/${id}/accept-reminder`, config);
+
+      return { data: result.data, error: false };
+    } catch (e) {
+      console.error(e, 'error accepting medication');
+      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+    }
+
+  };
+
+  const getMedications = async () => {
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authState.token}`
+      }
+    };
+
+    try {
+
+      const result = await axios.get(`${API_URL}/api/medication`, config);
+
+      return { data: result.data, error: false };
+    } catch (e) {
+      console.error(e, 'error getting medication');
       return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
     }
 
@@ -320,12 +392,13 @@ export const AuthProvider = ({ children }: any) => {
     onForgot: forgotPassword,
     onReset: resetPassword,
     authState,
-    user: authState ? authState.user : null,
+    user: authState.user,
     onAddMedication: addMedication,
-    // onGetMedication: getMedications,
+    onGetMedication: getMedications,
     onEditMedication: editMedication,
     onDeleteMedication: deleteMedication,
-    onConfirmForgot: confirmForgotPassword
+    onConfirmForgot: confirmForgotPassword,
+    onAcceptMedication: acceptMedication
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
