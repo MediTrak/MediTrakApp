@@ -137,10 +137,36 @@ export default function Planner() {
 
   const [modalVisible, setModalVisible] = useState<{ [id: string]: boolean }>({});
 
+  // const handleModalOpen = (id: string) => {
+  //   setModalVisible((prev) => ({ ...prev, [id]: true }));
+  //   console.log('Modal opened for:', id);
+  // };
+
   const handleModalOpen = (id: string) => {
-    setModalVisible((prev) => ({ ...prev, [id]: true }));
-    // console.log('Modal opened for:', id);
+    setModalVisible((prev) => {
+      const updatedModals = { ...prev };
+
+      // Check if the current modal is already open
+      if (updatedModals[id]) {
+        // If it's open, close it
+        updatedModals[id] = false;
+      } else {
+        // If it's not open, close any other open modals
+        Object.keys(updatedModals).forEach((modalId) => {
+          if (modalId !== id) {
+            updatedModals[modalId] = false;
+          }
+        });
+
+        // Open the modal with the specified id
+        updatedModals[id] = true;
+      }
+
+      console.log('Modal state:', updatedModals);
+      return updatedModals;
+    });
   };
+
 
   const handleModalClose = (id: string) => {
     setModalVisible((prev) => ({ ...prev, [id]: false }));
@@ -156,7 +182,7 @@ export default function Planner() {
   const handleShare = (id: string) => {
     handleToggleBottomSheet(id);
     setModalVisible((prev) => ({ ...prev, [id]: false }))
-    // console.log('Share button pressed for ID:', id);
+    console.log('Share button pressed for ID:', id);
   };
 
   const handleDelete = async (id: string) => {
@@ -164,7 +190,7 @@ export default function Planner() {
     const result = await onDeleteMedication!(id);
     handleModalClose(id);
     setSpinner(false)
-    // console.log('Delete button pressed for ID:', id);
+    console.log('Delete button pressed for ID:', id);
 
     if (result && !result.error) {
       toast.show({
@@ -254,13 +280,13 @@ export default function Planner() {
               All Medications
             </Text>
           )}
-          renderItem={({ item }: { item: DrugData }) => (
+          renderItem={({ item, index }: { item: DrugData, index: number }) => (
             <PlanDrugCard
               key={item._id}
               drug={item.name}
               noOfTablets={item.timesDaily}
-              startDate={item.fromWhen.toString().split('T')[0]}
-              endDate={item.tillWhen.toString().split('T')[0]}
+              // startDate={item.fromWhen.toString().split('T')[0]}
+              // endDate={item.tillWhen.toString().split('T')[0]}
               dosage={item.dosage.split('-')[0]}
               backgroundColor={item.timesDaily === 1 ? '#1C49B429' : (item.timesDaily === 2 ? '#F7876429' : '#2F8C1829')}
               textColor={item.timesDaily === 1 ? '#1C49B4' : (item.timesDaily === 2 ? '#F78764CC' : '#2F8C18')}
@@ -269,10 +295,15 @@ export default function Planner() {
               onSharePress={() => handleShare(item._id)}
               onDeletePress={() => handleDelete(item._id)}
               onModalClose={() => handleModalClose(item._id)}
-              modalVisible={modalVisible[item._id] || false}
+              modalVisible={modalVisible[item._id]}
+              id={item._id}
+              // message={messages[item._id]} 
+              // updateMessage={() => updateMessage(item._id)}
+              item={item}
             />
           )}
           estimatedItemSize={50}
+          extraData={modalVisible}
         />
       </View>
 
@@ -317,7 +348,7 @@ export default function Planner() {
             </TouchableOpacity>
             <HStack style={{ width: '100%', gap: 10 }}>
               {socials.map((item, index) => (
-                <VStack justifyContent={'center'} alignItems={'center'}>
+                <VStack justifyContent={'center'} alignItems={'center'} key={index}>
                   <TouchableOpacity key={index} style={{ padding: 8, backgroundColor: '#FBFBFB', borderRadius: 50 }}>
                     <Image
                       source={item.image}

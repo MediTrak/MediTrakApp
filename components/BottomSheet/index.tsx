@@ -18,7 +18,7 @@ const BottomSheetComponent = forwardRef<Ref, Props>(( props, ref ) => {
 
     // callbacks
     const handleSheetChanges = useCallback((index: number) => {
-        console.log('handleSheetChanges', index);
+        // console.log('handleSheetChanges', index);
     }, []);
 
     // renders

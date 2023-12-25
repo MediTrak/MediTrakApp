@@ -1,10 +1,9 @@
 import { HStack, VStack } from 'native-base';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Image, Text, Platform, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
-import { COLORS } from "../../constants";
+import { COLORS, SHADOWS } from "../../constants";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-// import Popover, { PopoverPlacement } from 'react-native-popover-view';
 
 
 type Props = {
@@ -12,16 +11,17 @@ type Props = {
     drug: string | undefined;
     noOfTablets: number | string | undefined;
     backgroundColor?: string | undefined;
-    textColor?: string | undefined;
-    onModalOpen?: () => void;
-    onEditPress?: () => void;
-    onSharePress?: () => void;
-    onDeletePress?: () => void;
-    onModalClose?: () => void;
+    textColor: string | undefined;
+    onModalOpen: () => void;
+    onEditPress: () => void;
+    onSharePress: () => void;
+    onDeletePress: () => void;
+    onModalClose: () => void;
     modalVisible: boolean;
-    startDate: string;
-    endDate: string;
-    dosage?: string;
+    startDate?: string;
+    endDate?: string;
+    dosage: string;
+    item: any;
 };
 
 const PlanDrugCard: React.FunctionComponent<Props> = ({
@@ -38,24 +38,65 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
     modalVisible,
     startDate,
     endDate,
-    dosage
+    dosage,
+    item
 }) => {
 
     const router = useRouter();
-    const touchable = useRef();
-    const [showPopover, setShowPopover] = useState(false);
+    const [showPopup, setShowPopup] = useState(modalVisible);
+    // const [state, setState] = useState(message)
+
+    const Popup = () => {
+        return (
+            <View style={styles.modalView} key={id}>
+                <View style={styles.cancelContainer}>
+                    <TouchableOpacity onPress={onModalClose}>
+                        <MaterialCommunityIcons name='close' size={20} />
+                    </TouchableOpacity>
+                </View>
+
+                {onEditPress && (
+                    <TouchableOpacity style={styles.textPress} onPress={onEditPress}>
+                        <Text style={styles.titleText}>Edit</Text>
+                    </TouchableOpacity>
+                )}
+
+                <View style={styles.divider} />
+
+                {onSharePress && (
+                    <TouchableOpacity style={styles.textPress} onPress={onSharePress}>
+                        <Text style={styles.titleText}>Share</Text>
+                    </TouchableOpacity>
+                )}
+
+                <View style={styles.divider} />
+
+                {onDeletePress && (
+                    <TouchableOpacity style={styles.textPress} onPress={onDeletePress}>
+                        <Text style={[styles.titleText, { color: '#DD2E44' }]}>Delete</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        )
+    }
 
 
     useEffect(() => {
+        // setState(message)
+        setShowPopup(modalVisible)
     }, [modalVisible]);
 
     return (
-        <VStack style={styles.container}>
+        <VStack style={styles.container} key={id}>
+            {modalVisible && (
+                <Popup key={id} />
+            )}
             <HStack justifyContent={'space-between'} alignItems={'center'} style={{ width: '100%' }}>
                 <Text style={{ fontSize: 16, color: COLORS.primary, textAlign: 'left', fontWeight: '500' }}>{drug}</Text>
 
                 <TouchableOpacity
                     onPress={onModalOpen}
+                // onPress={updateMessage}
                 >
                     <MaterialCommunityIcons name='dots-vertical' size={24} />
                 </TouchableOpacity>
@@ -68,50 +109,11 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
                 </View>
             </HStack>
 
-            <HStack style={{ marginTop: 10, marginRight: 12 }} justifyContent={'space-between'}>
+            {/* <HStack style={{ marginTop: 10, marginRight: 12 }} justifyContent={'space-between'}>
                 <Text style={{ color: COLORS.gray3, fontSize: 14, fontWeight: "500" }}>Start: {startDate}</Text>
                 <Text style={{ color: COLORS.gray3, fontSize: 14, fontWeight: "500" }}>End: {endDate}</Text>
-            </HStack>
+            </HStack> */}
 
-            {/* <Modal
-                animationType="fade"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={onModalClose}
-                key={id}
-            >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <View style={styles.cancelContainer}>
-                            <TouchableOpacity onPress={onModalClose}>
-                                <MaterialCommunityIcons name='close' size={24} />
-                            </TouchableOpacity>
-                        </View>
-
-                        {onEditPress && (
-                            <TouchableOpacity style={styles.textPress} onPress={onEditPress}>
-                                <Text style={styles.titleText}>Edit</Text>
-                            </TouchableOpacity>
-                        )}
-
-                        <View style={styles.divider} />
-
-                        {onSharePress && (
-                            <TouchableOpacity style={styles.textPress} onPress={onSharePress}>
-                                <Text style={styles.titleText}>Share</Text>
-                            </TouchableOpacity>
-                        )}
-
-                        <View style={styles.divider} />
-
-                        {onDeletePress && (
-                            <TouchableOpacity style={styles.textPress} onPress={onDeletePress}>
-                                <Text style={[styles.titleText, { color: '#DD2E44' }]}>Delete</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                </View>
-            </Modal> */}
         </VStack>
     );
 };
@@ -127,7 +129,14 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         padding: 12,
         borderRadius: 8,
-        marginBottom: 20
+        marginBottom: 20,
+        ...SHADOWS.medium,
+        shadowColor: COLORS.white,
+        elevation: 3,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        }, 
     },
 
     coloredText: {
@@ -137,19 +146,10 @@ const styles = StyleSheet.create({
         borderRadius: 112,
     },
 
-    centeredView: {
-        // flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 50,
-        // borderColor: 'red',
-        // borderWidth: 1
-    },
     modalView: {
-        margin: 20,
         paddingVertical: 10,
-        backgroundColor: 'white',
-        borderRadius: 20,
+        backgroundColor: COLORS.lightWhite,
+        borderRadius: 8,
         alignItems: 'flex-start',
         shadowColor: '#000',
         shadowOffset: {
@@ -158,8 +158,14 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.25,
         shadowRadius: 4,
-        elevation: 5,
-        width: '70%',
+        elevation: 3,
+        width: '30%',
+        position: 'absolute',
+        zIndex: 5,
+        // borderColor: 'red',
+        // borderWidth: 1,
+        right: 50,
+        top: 20,
     },
 
     modalText: {
@@ -180,13 +186,13 @@ const styles = StyleSheet.create({
         width: '100%',
         borderColor: '#F9F9F9',
         borderWidth: 1,
-        marginVertical: 10
+        marginVertical: 8
     },
 
     cancelContainer: {
         width: '100%',
         alignItems: 'flex-end',
-        paddingRight: 20
+        paddingRight: 10
     },
 
     textPress: {
