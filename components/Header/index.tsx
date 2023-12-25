@@ -44,7 +44,7 @@ const Header: React.FC<ScreenHeaderProps> = ({ user, notificationCount, headerTi
             }
 
             <HStack space={5} alignItems="center">
-                <TouchableOpacity onPress={handleSearchPress}>
+                <TouchableOpacity onPress={() => { router.push("/search")}}>
                     <AntDesign name="search1" size={20} color={COLORS.white} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { router.push("/notifications")}}>

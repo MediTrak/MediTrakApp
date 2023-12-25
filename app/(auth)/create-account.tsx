@@ -238,7 +238,7 @@ export default function CreateAccount() {
                 placeholderTextColor="#2A2A2A24"
               />
             </View>
-            <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
+            <HStack justifyContent={'space-between'} alignItems={'center'} style={{ minHeight: 18 }}>
               {errors.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
             </HStack>
           </View>
@@ -255,7 +255,7 @@ export default function CreateAccount() {
                 placeholderTextColor="#2A2A2A24"
               />
             </View>
-            <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
+            <HStack justifyContent={'space-between'} alignItems={'center'} style={{ minHeight: 18 }}>
               {errors.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
             </HStack>
           </View>
@@ -272,7 +272,7 @@ export default function CreateAccount() {
                 placeholderTextColor="#2A2A2A24"
               />
             </View>
-            <HStack justifyContent={'space-between'} alignItems={'center'} style={{ height: 18 }}>
+            <HStack justifyContent={'space-between'} alignItems={'center'} style={{ minHeight: 18 }}>
               {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
             </HStack>
           </View>
@@ -293,7 +293,7 @@ export default function CreateAccount() {
                 < Icon as={<MaterialIcons name={show ? "visibility" : "visibility-off"} />} size={5} color="#2A2A2ACC" />
               </Pressable>
             </View>
-            <HStack justifyContent={'space-between'} style={{ height: 18 }}>
+            <HStack justifyContent={'space-between'} style={{ minHeight: 18 }}>
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </HStack>
             <Text style={{ color: '#2A2A2ACC' }}>

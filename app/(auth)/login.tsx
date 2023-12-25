@@ -246,7 +246,7 @@ export default function Login() {
                 placeholderTextColor="#2A2A2A24"
               />
             </View>
-            <HStack alignItems={'center'} style={{ height: 18 }}>
+            <HStack alignItems={'center'} style={{ minHeight: 18 }}>
               {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
             </HStack>
           </View>
