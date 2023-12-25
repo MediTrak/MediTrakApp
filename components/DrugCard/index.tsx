@@ -17,7 +17,7 @@ const DrugCard: React.FunctionComponent<Props> = ({ drug, drugTwo, time, noOfTab
             <HStack justifyContent={'space-between'} alignItems={'center'} style={{ width: '100%' }}>
                 <VStack>
                     <Text style={{ fontSize: 14, color: COLORS.gray3, textAlign: 'left', fontWeight: '500' }}>{drug}</Text>
-                    <Text style={{ fontSize: 14, color: COLORS.gray2, fontWeight: '400' }}>({noOfTablets} tablet)</Text>
+                    <Text style={{ fontSize: 14, color: COLORS.gray2, fontWeight: '400' }}>({noOfTablets} {noOfTablets === 1 ? "tablet" : "tablets"})</Text>
                 </VStack>
                 <Text style={{ fontSize: 11, color: COLORS.gray3, fontWeight: '600' }}>
                     {time}

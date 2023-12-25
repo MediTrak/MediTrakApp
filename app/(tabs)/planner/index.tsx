@@ -23,6 +23,7 @@ interface DrugData {
   tillWhen: string;
   timeToTake?: [];
   dosage: string;
+  status?: string;
 };
 
 interface ToastItem {
@@ -42,6 +43,8 @@ export default function Planner() {
 
   const [spinner, setSpinner] = useState(false);
 
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+
   const { data: medication, isLoading, isFetching, error, refetch, isSuccess } = useGetMedicationQuery({});
 
   const medicationData = medication?.data || [];
@@ -56,17 +59,41 @@ export default function Planner() {
 
   useEffect(() => {
 
+    // const fetchData = async () => {
+    //   try {
+    //     // await refetch();
+    //   } catch (error) {
+    //     console.error('Error fetching medication:', error);
+    //     // Handle error if needed
+    //   }
+    // }
     const fetchData = async () => {
       try {
-        // await refetch();
+        await refetch();
+    
+        const today = new Date();
+    
+        if (medicationData) {
+          let filteredDates = medicationData?.map((item: { tillWhen: string | number | Date; }) => {
+            const tillWhenDate = new Date(item.tillWhen);
+            const status = tillWhenDate >= today ? 'active' : 'inactive';
+    
+            return { ...item, status };
+          });
+    
+          setFilteredData(filteredDates);
+        }
       } catch (error) {
         console.error('Error fetching medication:', error);
         // Handle error if needed
       }
     }
+    
     fetchData();
 
   }, [medication])
+
+  console.log(filteredData, 'see new data')
 
 
   const [bottomSheetOpen, setBottomSheetOpen] = useState<{ [id: string]: boolean }>({})
@@ -267,7 +294,7 @@ export default function Planner() {
       <Header headerTitle='Planner' />
       <View style={{ flex: 1, width: '100%' }}>
         <FlashList
-          data={medicationData}
+          data={filteredData}
           keyExtractor={(item) => item._id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ padding: 20 }}
@@ -285,8 +312,8 @@ export default function Planner() {
               key={item._id}
               drug={item.name}
               noOfTablets={item.timesDaily}
-              // startDate={item.fromWhen.toString().split('T')[0]}
-              // endDate={item.tillWhen.toString().split('T')[0]}
+              startDate={item.fromWhen.toString().split('T')[0]}
+              endDate={item.tillWhen.toString().split('T')[0]}
               dosage={item.dosage.split('-')[0]}
               backgroundColor={item.timesDaily === 1 ? '#1C49B429' : (item.timesDaily === 2 ? '#F7876429' : '#2F8C1829')}
               textColor={item.timesDaily === 1 ? '#1C49B4' : (item.timesDaily === 2 ? '#F78764CC' : '#2F8C18')}
@@ -297,9 +324,10 @@ export default function Planner() {
               onModalClose={() => handleModalClose(item._id)}
               modalVisible={modalVisible[item._id]}
               id={item._id}
-              // message={messages[item._id]} 
-              // updateMessage={() => updateMessage(item._id)}
               item={item}
+              status={item.status}
+              statusTextColor={item.status === 'active' ? '#2F8C18' : '#DC143C'}
+              statusBackgroundColor={item.status === 'active' ? '#2F8C1829' : '#DC143C29'}
             />
           )}
           estimatedItemSize={50}

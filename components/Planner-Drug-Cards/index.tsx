@@ -22,6 +22,9 @@ type Props = {
     endDate?: string;
     dosage: string;
     item: any;
+    status?: string;
+    statusBackgroundColor?: string | undefined;
+    statusTextColor?: string | undefined;
 };
 
 const PlanDrugCard: React.FunctionComponent<Props> = ({
@@ -39,7 +42,10 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
     startDate,
     endDate,
     dosage,
-    item
+    item,
+    status,
+    statusBackgroundColor,
+    statusTextColor
 }) => {
 
     const router = useRouter();
@@ -103,9 +109,13 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
 
             </HStack>
 
-            <HStack style={{ marginTop: 8 }}>
+            <HStack style={{ marginTop: 10 }} justifyContent={'space-between'} paddingRight={2.5}>
                 <View style={[styles.coloredText, { backgroundColor: backgroundColor }]}>
                     <Text style={{ color: textColor, fontSize: 13, fontWeight: "600" }}>{dosage} {dosage === "1" ? "tablet" : "tablets"} {noOfTablets === 1 ? '' : noOfTablets} {noOfTablets === 1 ? 'Once' : 'Times'} Daily</Text>
+                </View>
+
+                <View style={[styles.coloredText, { backgroundColor: statusBackgroundColor }]}>
+                    <Text style={{ color: statusTextColor, fontSize: 13, fontWeight: "600", textTransform: 'capitalize' }}>{status}</Text>
                 </View>
             </HStack>
 
@@ -136,14 +146,14 @@ const styles = StyleSheet.create({
         shadowOffset: {
             width: 0,
             height: 2,
-        }, 
+        },
     },
 
     coloredText: {
         padding: 8,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 112,
+        borderRadius: 12,
     },
 
     modalView: {
