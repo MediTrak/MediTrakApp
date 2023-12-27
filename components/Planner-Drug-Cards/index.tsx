@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
             width: 0,
             height: 2,
         },
+        zIndex: 3
     },
 
     coloredText: {
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
         // borderColor: 'red',
         // borderWidth: 1,
         right: 50,
-        top: 20,
+        top: 10,
     },
 
     modalText: {
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
         width: '100%',
         borderColor: '#F9F9F9',
         borderWidth: 1,
-        marginVertical: 8
+        marginVertical: 5
     },
 
     cancelContainer: {

@@ -255,7 +255,7 @@ export default function Planner() {
   const socials = [
     {
       id: '1',
-      image: require('../../../assets/images/whatsApp.png'),
+      image: require('../../../assets/images/WhatsApp.png'),
       title: 'WhatsApp',
     },
     {

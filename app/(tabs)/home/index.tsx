@@ -396,7 +396,7 @@ export default function Home() {
                   noOfTablets={item.timesDaily}
                 />
               )}
-              estimatedItemSize={50}
+              estimatedItemSize={20}
             />
           </View>
         ) : (
