@@ -10,11 +10,12 @@ type Props = {
     time?: any;
     checked?: boolean;
     handleChecked?: () => void;
+    id?: string;
 };
 
-const NotificationCard: React.FunctionComponent<Props> = ({ notification, desc, time, checked, handleChecked }) => {
+const NotificationCard: React.FunctionComponent<Props> = ({ notification, desc, time, checked, handleChecked, id }) => {
     return (
-        <HStack style={styles.container} justifyContent={'space-between'} alignItems={'center'}>
+        <HStack style={styles.container} justifyContent={'space-between'} alignItems={'center'} key={id}>
             <HStack space={2}>
 
                 <BouncyCheckbox

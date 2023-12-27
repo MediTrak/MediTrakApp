@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../constants';
 import { HStack } from 'native-base';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-import NotificationCard from '../../components/NotificationCard';
+import NotificationCard from '../../components/NotitificationCard';
 import { FlashList } from '@shopify/flash-list';
 
 

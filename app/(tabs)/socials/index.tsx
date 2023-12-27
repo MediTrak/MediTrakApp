@@ -113,7 +113,7 @@ export default function Socials() {
         revealHeaderOnScroll={true}
         snapThreshold={1}
         pagerProps={{
-          scrollEnabled: false
+          scrollEnabled: true
         }}
         renderHeader={HeaderComp}
         renderTabBar={(props) => {

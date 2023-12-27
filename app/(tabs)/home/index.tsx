@@ -186,9 +186,7 @@ export default function Home() {
     timeToTake: convertToTime(entry.timeToTake)
   }));
 
-  // console.log(filteredTimes, 'see filtered times')
-
-  const getNextTimeToTake = (entry: any): { _id: string, nextTime: Date | null } => {
+  const getNextTimeToTake = (entry: any): { _id: string, nextTime: Date | null | undefined} => {
 
     const currentDay = currentTime.toISOString().split('T')[0];
 
@@ -204,8 +202,8 @@ export default function Home() {
       // Sort the future times in ascending order
       futureTimes?.sort((a: any, b: any) => a - b);
 
-      // Get the next time or null if there is none
-      const nextTime = futureTimes?.[0] || null;
+      // Get the next time or if there is none revert to first time in array
+      const nextTime = futureTimes?.[0] || convertedTimes?.[0];
 
       return {
         _id: entry._id,
@@ -226,8 +224,6 @@ export default function Home() {
     id: _id,
     nextTime: nextTime
   }));
-
-  // console.log(nextTimeArray, 'Next Time Array');
 
   const formatTime = (date: Date | null | undefined): string => {
     if (!date) {
@@ -346,7 +342,7 @@ export default function Home() {
         )
       }
 
-      {isLoading || isFetching ? (
+      {isLoading ? (
         <ActivityIndicator size='large' color={COLORS.primary} />
       ) : (
 

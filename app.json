@@ -29,7 +29,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#183059"
       },
       "permissions": [
         "android.permission.CAMERA",
@@ -56,13 +56,21 @@
         "expo-notifications",
         {
           "icon": "./local/assets/notification-icon.png",
-          "color": "#ffffff",
-          "sounds": [
-            "./local/assets/notification-sound.wav",
-            "./local/assets/notification-sound-other.wav"
-          ]
+          "color": "#ffffff"
+          // "sounds": [
+          //   "./local/assets/notification-sound.wav",
+          //   "./local/assets/notification-sound-other.wav"
+          // ]
         }
       ]
+      // [
+      //   "expo-build-properties",
+      //   {
+      //     "android": {
+      //       "extraMavenRepos": ["$rootDir/../../../node_modules/@notifee/react-native/android/libs"]
+      //     }
+      //   }
+      // ]
     ],
     "experiments": {
       "typedRoutes": true

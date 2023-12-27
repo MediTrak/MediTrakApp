@@ -58,29 +58,20 @@ export default function Planner() {
   }, [refetch]);
 
   useEffect(() => {
-
-    // const fetchData = async () => {
-    //   try {
-    //     // await refetch();
-    //   } catch (error) {
-    //     console.error('Error fetching medication:', error);
-    //     // Handle error if needed
-    //   }
-    // }
     const fetchData = async () => {
       try {
         await refetch();
-    
+
         const today = new Date();
-    
+
         if (medicationData) {
           let filteredDates = medicationData?.map((item: { tillWhen: string | number | Date; }) => {
             const tillWhenDate = new Date(item.tillWhen);
             const status = tillWhenDate >= today ? 'active' : 'inactive';
-    
+
             return { ...item, status };
           });
-    
+
           setFilteredData(filteredDates);
         }
       } catch (error) {
@@ -88,13 +79,10 @@ export default function Planner() {
         // Handle error if needed
       }
     }
-    
+
     fetchData();
 
   }, [medication])
-
-  console.log(filteredData, 'see new data')
-
 
   const [bottomSheetOpen, setBottomSheetOpen] = useState<{ [id: string]: boolean }>({})
 
@@ -113,7 +101,7 @@ export default function Planner() {
       ...prevIds,
       [id]: !prevIds[id], // Toggle the value for the given id
     }));
-    console.log('Share button pressed for bottom sheet:', id);
+    // console.log('Share button pressed for bottom sheet:', id);
   };
 
 
@@ -189,7 +177,7 @@ export default function Planner() {
         updatedModals[id] = true;
       }
 
-      console.log('Modal state:', updatedModals);
+      // console.log('Modal state:', updatedModals);
       return updatedModals;
     });
   };
@@ -197,19 +185,19 @@ export default function Planner() {
 
   const handleModalClose = (id: string) => {
     setModalVisible((prev) => ({ ...prev, [id]: false }));
-    console.log('Closing Modal for:', id);
+    // console.log('Closing Modal for:', id);
   };
 
   const handleEdit = (id: string) => {
     router.push({ pathname: "/medication-form", params: { id: id } });
     setModalVisible((prev) => ({ ...prev, [id]: false }));
-    console.log('Edit button pressed for ID:', id);
+    // console.log('Edit button pressed for ID:', id);
   };
 
   const handleShare = (id: string) => {
     handleToggleBottomSheet(id);
     setModalVisible((prev) => ({ ...prev, [id]: false }))
-    console.log('Share button pressed for ID:', id);
+    // console.log('Share button pressed for ID:', id);
   };
 
   const handleDelete = async (id: string) => {
@@ -217,7 +205,7 @@ export default function Planner() {
     const result = await onDeleteMedication!(id);
     handleModalClose(id);
     setSpinner(false)
-    console.log('Delete button pressed for ID:', id);
+    // console.log('Delete button pressed for ID:', id);
 
     if (result && !result.error) {
       toast.show({
@@ -252,9 +240,9 @@ export default function Planner() {
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          console.log('Shared with activity type of: ', result.activityType);
+          // console.log('Shared with activity type of: ', result.activityType);
         } else {
-          console.log('Shared successfully');
+          // console.log('Shared successfully');
         }
       } else if (result.action === Share.dismissedAction) {
         // Handle dismissal
@@ -293,50 +281,51 @@ export default function Planner() {
       <Stack.Screen options={{ headerShown: false, title: "Planner" }} />
       <Header headerTitle='Planner' />
       <View style={{ flex: 1, width: '100%' }}>
-        <FlashList
-          data={filteredData}
-          keyExtractor={(item) => item._id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ padding: 20 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListHeaderComponent={() => (
-            <Text style={{
-              fontSize: 14, fontWeight: '600', color: "#2a2a2a",
-              textAlign: "left", marginBottom: 20
-            }}>
-              All Medications
-            </Text>
-          )}
-          renderItem={({ item, index }: { item: DrugData, index: number }) => (
-            <PlanDrugCard
-              key={item._id}
-              drug={item.name}
-              noOfTablets={item.timesDaily}
-              startDate={item.fromWhen.toString().split('T')[0]}
-              endDate={item.tillWhen.toString().split('T')[0]}
-              dosage={item.dosage.split('-')[0]}
-              backgroundColor={item.timesDaily === 1 ? '#1C49B429' : (item.timesDaily === 2 ? '#F7876429' : '#2F8C1829')}
-              textColor={item.timesDaily === 1 ? '#1C49B4' : (item.timesDaily === 2 ? '#F78764CC' : '#2F8C18')}
-              onModalOpen={() => handleModalOpen(item._id)}
-              onEditPress={() => handleEdit(item._id)}
-              onSharePress={() => handleShare(item._id)}
-              onDeletePress={() => handleDelete(item._id)}
-              onModalClose={() => handleModalClose(item._id)}
-              modalVisible={modalVisible[item._id]}
-              id={item._id}
-              item={item}
-              status={item.status}
-              statusTextColor={item.status === 'active' ? '#2F8C18' : '#DC143C'}
-              statusBackgroundColor={item.status === 'active' ? '#2F8C1829' : '#DC143C29'}
-            />
-          )}
-          estimatedItemSize={50}
-          extraData={modalVisible}
-        />
+        {isLoading ? (
+          <ActivityIndicator size='large' color={COLORS.primary} />
+        ) : (
+          <FlashList
+            data={filteredData}
+            keyExtractor={(item) => item._id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ padding: 20 }}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            ListHeaderComponent={() => (
+              <Text style={{
+                fontSize: 14, fontWeight: '600', color: "#2a2a2a",
+                textAlign: "left", marginBottom: 20
+              }}>
+                All Medications
+              </Text>
+            )}
+            renderItem={({ item, index }: { item: DrugData, index: number }) => (
+              <PlanDrugCard
+                key={item._id}
+                drug={item.name}
+                noOfTablets={item.timesDaily}
+                startDate={item.fromWhen.toString().split('T')[0]}
+                endDate={item.tillWhen.toString().split('T')[0]}
+                dosage={item.dosage.split('-')[0]}
+                backgroundColor={item.timesDaily === 1 ? '#1C49B429' : (item.timesDaily === 2 ? '#F7876429' : '#2F8C1829')}
+                textColor={item.timesDaily === 1 ? '#1C49B4' : (item.timesDaily === 2 ? '#F78764CC' : '#2F8C18')}
+                onModalOpen={() => handleModalOpen(item._id)}
+                onEditPress={() => handleEdit(item._id)}
+                onSharePress={() => handleShare(item._id)}
+                onDeletePress={() => handleDelete(item._id)}
+                onModalClose={() => handleModalClose(item._id)}
+                modalVisible={modalVisible[item._id]}
+                id={item._id}
+                item={item}
+                status={item.status}
+                statusTextColor={item.status === 'active' ? '#2F8C18' : '#DC143C'}
+                statusBackgroundColor={item.status === 'active' ? '#2F8C1829' : '#DC143C29'}
+              />
+            )}
+            estimatedItemSize={20}
+            extraData={modalVisible}
+          />
+        )}
       </View>
-
-
-
       <TouchableOpacity style={styles.button} onPress={() => {
         router.push("/medication-form");
       }}>
