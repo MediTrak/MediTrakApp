@@ -35,7 +35,8 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.olalexy1.MediTrakApp"
+      "package": "com.olalexy1.MediTrakApp",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -53,7 +54,7 @@
         }
       ],
       [
-        "expo-notifications",
+        "expo-notifications"
         // {
         //   "icon": "./local/assets/notification-icon.png",
         //   "color": "#ffffff",
@@ -62,6 +63,15 @@
         //     "./local/assets/notification-sound-other.wav"
         //   ]
         // }
+      ],
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
       ]
     ],
     "experiments": {

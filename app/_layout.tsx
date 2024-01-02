@@ -13,6 +13,7 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Camera } from 'react-native-vision-camera';
+// import { AuthProvider } from '../context/AuthProvider';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({

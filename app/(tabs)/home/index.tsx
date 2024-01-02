@@ -20,6 +20,7 @@ import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
 import { BackgroundFetchStatus } from 'expo-background-fetch';
 import { FlashList } from '@shopify/flash-list';
+import notifee, { AndroidImportance, AndroidNotificationSetting, TimestampTrigger, TriggerType } from '@notifee/react-native';
 
 interface ToastItem {
   title: string;
@@ -155,7 +156,7 @@ export default function Home() {
 
   const currentTime = new Date(time.getTime() + 60 * 60 * 1000);
 
-  // console.log(filteredData, 'see filtered Data')
+  console.log(filteredData, 'see filtered Data')
 
   let hasFilteredData = filteredData?.length > 0;
 
@@ -186,7 +187,7 @@ export default function Home() {
     timeToTake: convertToTime(entry.timeToTake)
   }));
 
-  const getNextTimeToTake = (entry: any): { _id: string, nextTime: Date | null | undefined} => {
+  const getNextTimeToTake = (entry: any): { _id: string, nextTime: Date | null | undefined } => {
 
     const currentDay = currentTime.toISOString().split('T')[0];
 
@@ -239,92 +240,84 @@ export default function Home() {
 
   };
 
-  // async function scheduleNotification(nextTimeArray: any) {
-  //   for (const { id, nextTime } of nextTimeArray) {
-  //     const notificationTime = new Date(nextTime);
-
-  //     await Notifications.scheduleNotificationAsync({
-  //       content: {
-  //         title: 'Take your Drug',
-  //         body: 'Here is the notification body',
-  //         data: { data: 'goes here', url: '/home' },
-  //       },
-  //       trigger: { date: notificationTime },
-  //     });
-  //   }
-  // }
-
-  // const nextArray = [
-  //   { id: '1', nextTime: '2023-12-17T03:05:00.000Z' },
-  //   { id: '2', nextTime: '2023-12-17T10:30:00.000Z' },
-  // ]
+  console.log(nextTimeArray, 'next time array')
+  //  ^?
 
   // scheduleNotification(nextArray)
 
+  async function onDisplayNotification() {
+    // Request permissions (required for iOS)
+    await notifee.requestPermission()
 
-  const nextArray = [
-    { id: '1', nextTime: '2023-12-17T04:00:00.000Z' },
-    { id: '2', nextTime: '2023-12-17T10:30:00.000Z' },
-    // ... other entries
-  ];
+    // Create a channel (required for Android)
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      importance: AndroidImportance.HIGH
+    });
 
-  // async function scheduleNotification(id: string, nextTime: string | number | Date) {
-  //   const notificationTime = new Date(nextTime);
-
-  //   await Notifications.scheduleNotificationAsync({
-  //     content: {
-  //       title: 'Take your Drug',
-  //       body: 'Here is the notification body',
-  //       data: { data: 'goes here', url: '/home' },
-  //     },
-  //     trigger: { date: notificationTime },
-  //   });
-  // }
-
-  // async function checkAndScheduleNotifications() {
-
-  //   for (const { id, nextTime } of nextArray) {
-  //     const notificationTime = new Date(nextTime);
-
-  //     if (notificationTime > currentTime) {
-  //       await scheduleNotification(id, notificationTime);
-  //     }
-  //   }
-  // }
-
-  // // Register the background task
-  // Notifications.registerTaskAsync('checkAndScheduleNotifications');
-
-  // // Schedule notifications when the app starts
-  // checkAndScheduleNotifications();
-
-  async function registerBackgroundFetchAsync() {
-    return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-      minimumInterval: 60 * 15, // 15 minutes
-      stopOnTerminate: false, // android only,
-      startOnBoot: true, // android only
+    // Display a notification
+    await notifee.displayNotification({
+      title: 'Notification Title',
+      body: 'Main body content of the notification',
+      android: {
+        channelId,
+        importance: AndroidImportance.HIGH,
+        pressAction: {
+          id: 'default',
+        },
+      },
     });
   }
 
-  const [isRegistered, setIsRegistered] = React.useState(false);
-  const [status, setStatus] = React.useState<BackgroundFetchStatus | null>(null);
+  useEffect(() => {
 
-  React.useEffect(() => {
-    checkStatusAsync();
-  }, []);
+    const getAlarmPermission = async () => {
+      const settings = await notifee.getNotificationSettings();
+      if (settings.android.alarm == AndroidNotificationSetting.ENABLED) {
+        //Create timestamp trigger
+      } else {
+        // Show some user information to educate them on what exact alarm permission is,
+        // and why it is necessary for your app functionality, then send them to system preferences:
+        await notifee.openAlarmPermissionSettings();
+      }
+    }
 
-  const checkStatusAsync = async () => {
-    const status = await BackgroundFetch.getStatusAsync();
-    const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_FETCH_TASK);
-    setStatus(status);
-    setIsRegistered(isRegistered);
+    getAlarmPermission();
+
+  }, [])
+
+
+  async function onCreateTriggerNotification() {
+    const date = new Date(Date.now());
+    date.setHours(3);
+    date.setMinutes(59);
+
+    // Create a time-based trigger
+    const trigger: TimestampTrigger = {
+      type: TriggerType.TIMESTAMP,
+      timestamp: date.getTime(), // fire at 11:10am (10 minutes before meeting)
+      // alarmManager: true
+    };
+
+    // Create a trigger notification
+    await notifee.createTriggerNotification(
+      {
+        title: 'Meeting with Jane',
+        body: 'Today at 03:59am',
+        android: {
+          channelId: 'default',
+          importance: AndroidImportance.HIGH,
+          pressAction: {
+            id: 'default',
+          },
+        },
+      },
+      trigger,
+    );
   }
 
 
-  const toggleFetchTask = async () => {
-    await registerBackgroundFetchAsync();
-    checkStatusAsync();
-  };
 
   return (
     <SafeAreaView style={{
@@ -369,10 +362,9 @@ export default function Home() {
               onPress={schedulePushNotification}
             />
 
-            <Button
-              title={'Register BackgroundFetch task'}
-              onPress={toggleFetchTask}
-            />
+            <Button title="Display Notification" onPress={() => onDisplayNotification()} />
+
+            <Button title="Create Trigger Notifications" onPress={() => onCreateTriggerNotification()} />
 
             <FlashList
               data={filteredData}
