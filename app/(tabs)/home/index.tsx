@@ -357,14 +357,14 @@ export default function Home() {
               handlePress={() => router.push("/add-evidence")}
             />
 
-            <Button
+            {/* <Button
               title="Schedule test notifications"
               onPress={schedulePushNotification}
             />
 
             <Button title="Display Notification" onPress={() => onDisplayNotification()} />
 
-            <Button title="Create Trigger Notifications" onPress={() => onCreateTriggerNotification()} />
+            <Button title="Create Trigger Notifications" onPress={() => onCreateTriggerNotification()} /> */}
 
             <FlashList
               data={filteredData}

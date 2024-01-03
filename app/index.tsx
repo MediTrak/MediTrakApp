@@ -24,7 +24,7 @@ const Index = () => {
 
   const [isNavigationReady, setNavigationReady] = React.useState(false);
 
-  const [isFirstLaunch, setIsFirstLaunch] = React.useState(false);
+  const [isFirstLaunch, setIsFirstLaunch] = React.useState(true);
 
   // console.log(user, authState?.authenticated , 'see index file')
 
@@ -47,25 +47,25 @@ const Index = () => {
   //   loadToken();
   // }, [])
 
-  React.useEffect(() => {
-    const checkFirstLaunch = async () => {
-      try {
-        const hasLaunched = await getLaunchData(HAS_LAUNCHED);
-        if (hasLaunched) {
-          setIsFirstLaunch(true);
-        }
+  // React.useEffect(() => {
+  //   const checkFirstLaunch = async () => {
+  //     try {
+  //       const hasLaunched = await getLaunchData(HAS_LAUNCHED);
+  //       if (hasLaunched) {
+  //         setIsFirstLaunch(true);
+  //       }
 
-        else {
-          await storeLaunchData(HAS_LAUNCHED, 'true');
-          setIsFirstLaunch(false);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  //       else {
+  //         await storeLaunchData(HAS_LAUNCHED, 'true');
+  //         setIsFirstLaunch(false);
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
 
-    checkFirstLaunch(); //invoke the function
-  }, []);
+  //   checkFirstLaunch(); //invoke the function
+  // }, []);
 
   // console.log('isFirstLaunch', isFirstLaunch)
 
