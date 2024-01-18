@@ -6,7 +6,8 @@ import { useToast, VStack, HStack, Center, IconButton, CloseIcon, Alert, Icon } 
 import { checkPasswordStrength, validateEmail } from "../../utils";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Spinner from 'react-native-loading-spinner-overlay';
-import { useAuth } from "../context/auth";
+// import { useAuth } from "../context/auth";
+import { useAuth } from "../../context/AuthProvider";
 import { MaterialIcons } from "@expo/vector-icons";
 
 interface FormData {

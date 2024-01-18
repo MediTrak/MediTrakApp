@@ -20,14 +20,14 @@ export default function AddEvidence() {
     const [showCamera, setShowCamera] = useState(false);
     const [imageSource, setImageSource] = useState('');
 
-    // useEffect(() => {
-    //     async function getPermission() {
-    //         const newCameraPermission = await Camera.requestCameraPermission();
-    //         setShowCamera(true)
-    //         console.log('see camera permission:', newCameraPermission );
-    //     }
-    //     getPermission();
-    // }, []);
+    useEffect(() => {
+        async function getPermission() {
+            const newCameraPermission = await Camera.requestCameraPermission();
+            setShowCamera(true)
+            console.log('see camera permission:', newCameraPermission );
+        }
+        getPermission();
+    }, []);
 
     const capturePhoto = async () => {
         if (camera.current !== null) {

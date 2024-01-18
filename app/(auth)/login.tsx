@@ -6,7 +6,8 @@ import { validateEmail } from "../../utils";
 import { useToast, VStack, HStack, IconButton, CloseIcon, Alert, Icon } from 'native-base';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../context/auth";
+// import { useAuth } from "../context/auth";
+import { useAuth } from "../../context/AuthProvider";
 import { useDispatch } from 'react-redux'
 import { setCredentials } from '../services/authSlice';
 import { useLoginMutation } from "../services/mediTrakApi";

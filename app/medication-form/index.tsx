@@ -10,7 +10,8 @@ import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import DateTimePicker, { Event } from '@react-native-community/datetimepicker';
 import React from "react";
-import { useAuth } from "../context/auth";
+// import { useAuth } from "../context/auth";
+import { useAuth } from "../../context/AuthProvider";
 import { useGetMedicationQuery } from '../services/mediTrakApi';
 
 interface FormData {

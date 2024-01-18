@@ -4,14 +4,8 @@ import * as SecureStore from 'expo-secure-store';
 import { useRouter, useSegments } from "expo-router";
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../app/services/authSlice';
+import { MMKV } from 'react-native-mmkv';
 
-// interface User {
-//   firstName?: string;
-//   lastName?: string;
-//   email?: string;
-//   confirmed?: boolean;
-//   id: string;
-// }
 
 interface User {
   firstName: string;
@@ -22,7 +16,7 @@ interface User {
   confirmationTokenExpiry?: string;
   confirmed?: boolean;
   hospital?: {
-      name: string;
+    name: string;
   };
   password?: string;
   role?: string;
@@ -62,27 +56,6 @@ export const useAuth = () => {
   return useContext(AuthContext)
 }
 
-function useProtectedRoute(user: any) {
-  const segments = useSegments();
-  const router = useRouter();
-
-  useEffect(() => {
-    const inAuthGroup = segments[0] === "(auth)";
-
-    if (
-      // If the user is not signed in and the initial segment is not anything in the auth group.
-      !user &&
-      !inAuthGroup
-    ) {
-      // Redirect to the sign-in page.
-      router.replace("/login");
-    } else if (user && inAuthGroup) {
-      // Redirect away from the sign-in page.
-      router.replace("/home");
-    }
-  }, [user, segments]);
-}
-
 export const AuthProvider = ({ children }: any) => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -92,13 +65,11 @@ export const AuthProvider = ({ children }: any) => {
     user: User | null;
   }>({
     token: null,
-    authenticated: null,
+    authenticated: false,
     user: null
   });
 
-  useProtectedRoute(authState.user);
-
-  // console.log(authState.user, authState.token, authState.authenticated, 'see authState in context outside useEffect')
+  // console.log(authState, 'see authState in context outside useEffect')
 
   useEffect(() => {
     const loadToken = async () => {
@@ -114,11 +85,19 @@ export const AuthProvider = ({ children }: any) => {
           setAuthState({
             token: userToken,
             authenticated: true,
-            user: storedUserInfo
+            user: {
+              firstName: storedUserInfo?.firstName,
+              lastName: storedUserInfo?.lastName,
+              email: storedUserInfo?.email,
+              confirmed: storedUserInfo?.confirmed,
+              id: storedUserInfo?.id
+            }
           })
 
           const userLogin: UserResponse = {
-            user: storedUserInfo,
+            user: {
+              ...storedUserInfo,
+            },
             token: userToken
           }
 
@@ -134,11 +113,34 @@ export const AuthProvider = ({ children }: any) => {
 
       } catch (error) {
         console.error("Error fetching token or user info:", error);
-        // Handle the error, perhaps setAuthState to indicate an error state
       }
     }
     loadToken();
   }, [])
+
+
+  function useProtectedRoute(user: any) {
+    const segments = useSegments();
+    // const router = useRouter();
+
+    useEffect(() => {
+      const inAuthGroup = segments[0] === "(auth)";
+
+      if (
+        // If the user is not signed in and the initial segment is not anything in the auth group.
+        !user &&
+        !inAuthGroup
+      ) {
+        // Redirect to the sign-in page.
+        router.replace("/onboardingScreen");
+      } else if (user && inAuthGroup) {
+        // Redirect away from the sign-in page.
+        router.replace("/home");
+      }
+    }, [user, segments]);
+  }
+
+  useProtectedRoute(authState.user);
 
   const register = async (firstName: string, lastName: string, email: string, password: string) => {
     try {
@@ -157,9 +159,9 @@ export const AuthProvider = ({ children }: any) => {
 
       const result = await axios.post(`${API_URL}/api/confirm_account`, { confirmationToken });
 
-      console.log(result.data, 'result after registration')
+      // console.log(result.data, 'result after registration')
 
-      console.log(result?.data.token, 'token from  register result')
+      // console.log(result?.data.token, 'token from  register result')
 
       setAuthState({
         token: result?.data.token,
@@ -183,11 +185,20 @@ export const AuthProvider = ({ children }: any) => {
         id: result?.data.user._id
       };
 
+      const userLogin: UserResponse = {
+        user: {
+          ...userObject,
+        },
+        token: token
+      }
+
+      dispatch(setCredentials(userLogin))
+
       const userObjectString = JSON.stringify(userObject);
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${result?.data.token}`
 
-      await SecureStore.setItemAsync(TOKEN_KEY, result?.data.token)
+      await SecureStore.setItemAsync(TOKEN_KEY, token)
 
       await SecureStore.setItemAsync(USER, userObjectString);
 
@@ -223,6 +234,15 @@ export const AuthProvider = ({ children }: any) => {
         confirmed: result?.data.user.confirmed,
         id: result?.data.user._id
       };
+
+      const userLogin: UserResponse = {
+        user: {
+          ...userObject,
+        },
+        token: token
+      }
+
+      dispatch(setCredentials(userLogin))
 
       const userObjectString = JSON.stringify(userObject);
 

@@ -1,7 +1,6 @@
 import { Text, View, TextInput, StyleSheet, TouchableOpacity, Image, NativeSyntheticEvent, TextInputChangeEventData, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, StatusBar } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
 import { useState } from "react";
-// import { Input, Icon, CheckBox } from '@rneui/themed';
 import { COLORS, FONT, SIZES } from "../../constants";
 import { useToast, VStack, HStack, IconButton, CloseIcon, Alert, Select, CheckIcon, Checkbox } from 'native-base';
 import Spinner from 'react-native-loading-spinner-overlay';

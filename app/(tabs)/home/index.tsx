@@ -4,7 +4,8 @@ import Header from '../../../components/Header';
 import AddMedication from '../../../components/Screens/AddMedication';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, FONT, SIZES } from "../../../constants";
-import { useAuth } from "../../context/auth";
+// import { useAuth } from "../../context/auth";
+import { useAuth } from '../../../context/AuthProvider';
 import DailyGoalCard from '../../../components/DailyGoalCard';
 import { avatarLetters } from '../../../utils';
 import DrugCard from '../../../components/DrugCard';
@@ -64,60 +65,16 @@ export default function Home() {
 
   const { data: medication, isLoading, isFetching, error, refetch, isSuccess } = useGetMedicationQuery({});
 
-  // console.log(medication, isSuccess, error, 'see medication')
+  // console.log('isSuccess: ', isSuccess, 'error: ', error, '<====see medication data status')
 
   const medicationData = medication?.data || [];
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const ToastAlert: React.FC<ToastItem & { id: string, status?: string, duration: number }> = ({
-    id,
-    status,
-    variant,
-    title,
-    description,
-    isClosable,
-    duration,
-    ...rest
-  }) => (
-    <Alert
-      maxWidth="95%"
-      alignSelf="center"
-      flexDirection="row"
-      status={status ? status : "info"}
-      variant={variant}
-      {...rest}
-    >
-      <VStack space={1} flexShrink={1} w="100%">
-        <HStack flexShrink={1} alignItems="center" justifyContent="space-between">
-          <HStack space={2} flexShrink={1} alignItems="center">
-            <Alert.Icon />
-            <Text style={styles.alertTitleText}>
-              {title}
-            </Text>
-          </HStack>
-          {isClosable ? (
-            <IconButton
-              variant="unstyled"
-              icon={<CloseIcon size="3" />}
-              _icon={{
-                color: variant === "solid" ? "lightText" : "darkText"
-              }}
-              onPress={() => toast.close(id)}
-            />
-          ) : null}
-        </HStack>
-        <Text style={styles.alertTitleText}>
-          {description}
-        </Text>
-      </VStack>
-    </Alert>
-  );
-
-  if (!isSuccess) {
-    console.log(isSuccess, ":", error)
-    // router.push("/login");
-  }
+  // if (!isSuccess) {
+  //   console.log(isSuccess, ":", error)
+  //   // router.push("/login");
+  // }
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -156,7 +113,7 @@ export default function Home() {
 
   const currentTime = new Date(time.getTime() + 60 * 60 * 1000);
 
-  console.log(filteredData, 'see filtered Data')
+  // console.log(filteredData, 'see filtered Data')
 
   let hasFilteredData = filteredData?.length > 0;
 
@@ -240,7 +197,7 @@ export default function Home() {
 
   };
 
-  console.log(nextTimeArray, 'next time array')
+  // console.log(nextTimeArray, 'next time array')
   //  ^?
 
   // scheduleNotification(nextArray)

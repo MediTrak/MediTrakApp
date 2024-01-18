@@ -1,13 +1,13 @@
 import { HStack, VStack } from 'native-base';
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, memo, useEffect, useState } from 'react';
 import { View, StyleSheet, Image, Text, Platform, TouchableOpacity, Alert, Modal, Pressable } from 'react-native';
 import { COLORS, SHADOWS } from "../../constants";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 
-type Props = {
-    id?: string | undefined;
+interface Props {
+    id: string;
     drug: string | undefined;
     noOfTablets: number | string | undefined;
     backgroundColor?: string | undefined;
@@ -17,7 +17,7 @@ type Props = {
     onSharePress: () => void;
     onDeletePress: () => void;
     onModalClose: () => void;
-    modalVisible: boolean;
+    modalVisible: { [id: string]: boolean };
     startDate?: string;
     endDate?: string;
     dosage: string;
@@ -25,6 +25,7 @@ type Props = {
     status?: string;
     statusBackgroundColor?: string | undefined;
     statusTextColor?: string | undefined;
+    // setModalVisible: Dispatch<SetStateAction<{ [id: string]: boolean }>>;
 };
 
 const PlanDrugCard: React.FunctionComponent<Props> = ({
@@ -45,18 +46,17 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
     item,
     status,
     statusBackgroundColor,
-    statusTextColor
+    statusTextColor,
+    // setModalVisible,
 }) => {
-
-    const router = useRouter();
-    const [showPopup, setShowPopup] = useState(modalVisible);
-    // const [state, setState] = useState(message)
 
     const Popup = () => {
         return (
-            <View style={styles.modalView} key={id}>
+            <View style={styles.modalView}>
                 <View style={styles.cancelContainer}>
-                    <TouchableOpacity onPress={onModalClose}>
+                    <TouchableOpacity
+                        onPress={onModalClose}
+                    >
                         <MaterialCommunityIcons name='close' size={20} />
                     </TouchableOpacity>
                 </View>
@@ -86,23 +86,50 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
         )
     }
 
-
-    useEffect(() => {
-        // setState(message)
-        setShowPopup(modalVisible)
-    }, [modalVisible]);
+    const MemoizedPopup = memo(Popup)
 
     return (
-        <VStack style={styles.container} key={id}>
-            {modalVisible && (
-                <Popup key={id} />
+        <VStack style={styles.container}
+        >
+            {modalVisible[id] && (
+                // <View style={styles.modalView}
+                //     // key={`modal-${id}`}
+                // >
+                //     <View style={styles.cancelContainer}>
+                //         <TouchableOpacity onPress={onModalClose}>
+                //             <MaterialCommunityIcons name='close' size={20} />
+                //         </TouchableOpacity>
+                //     </View>
+
+                //     {onEditPress && (
+                //         <TouchableOpacity style={styles.textPress} onPress={onEditPress}>
+                //             <Text style={styles.titleText}>Edit</Text>
+                //         </TouchableOpacity>
+                //     )}
+
+                //     <View style={styles.divider} />
+
+                //     {onSharePress && (
+                //         <TouchableOpacity style={styles.textPress} onPress={onSharePress}>
+                //             <Text style={styles.titleText}>Share</Text>
+                //         </TouchableOpacity>
+                //     )}
+
+                //     <View style={styles.divider} />
+
+                //     {onDeletePress && (
+                //         <TouchableOpacity style={styles.textPress} onPress={onDeletePress}>
+                //             <Text style={[styles.titleText, { color: '#DD2E44' }]}>Delete</Text>
+                //         </TouchableOpacity>
+                //     )}
+                // </View>
+                <MemoizedPopup />
             )}
             <HStack justifyContent={'space-between'} alignItems={'center'} style={{ width: '100%' }}>
                 <Text style={{ fontSize: 16, color: COLORS.primary, textAlign: 'left', fontWeight: '500' }}>{drug}</Text>
 
                 <TouchableOpacity
                     onPress={onModalOpen}
-                // onPress={updateMessage}
                 >
                     <MaterialCommunityIcons name='dots-vertical' size={24} />
                 </TouchableOpacity>
@@ -134,10 +161,10 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'space-between',
         width: '100%',
-        paddingHorizontal: 20,
+        // paddingHorizontal: 20,
         borderColor: '#2A2A2A12',
         borderWidth: 1,
-        padding: 12,
+        padding: 20,
         borderRadius: 8,
         marginBottom: 20,
         ...SHADOWS.medium,
@@ -147,7 +174,7 @@ const styles = StyleSheet.create({
             width: 0,
             height: 2,
         },
-        zIndex: 3
+        position: 'relative'
     },
 
     coloredText: {
@@ -158,25 +185,25 @@ const styles = StyleSheet.create({
     },
 
     modalView: {
-        paddingVertical: 10,
-        backgroundColor: COLORS.lightWhite,
+        paddingVertical: 6,
+        backgroundColor: COLORS.white,
         borderRadius: 8,
         alignItems: 'flex-start',
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
-            height: 2,
+            height: 1,
         },
         shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowRadius: 2,
+        elevation: 13,
         width: '30%',
         position: 'absolute',
-        zIndex: 5,
-        // borderColor: 'red',
-        // borderWidth: 1,
+        zIndex: 1000,
+        borderColor: COLORS.lightWhite,
+        borderWidth: 1,
         right: 50,
-        top: 10,
+        top: 5,
     },
 
     modalText: {
@@ -195,7 +222,7 @@ const styles = StyleSheet.create({
 
     divider: {
         width: '100%',
-        borderColor: '#F9F9F9',
+        borderColor: COLORS.white,
         borderWidth: 1,
         marginVertical: 5
     },

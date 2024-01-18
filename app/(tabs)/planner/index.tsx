@@ -5,13 +5,16 @@ import { COLORS, FONT, SIZES } from '../../../constants';
 import Header from '../../../components/Header';
 import PlanDrugCard from '../../../components/Planner-Drug-Cards';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef, SetStateAction } from 'react';
 import { useGetMedicationQuery } from '../../services/mediTrakApi';
 import BottomSheetComponent from '../../../components/BottomSheet';
 import { HStack, VStack, useToast, IconButton, CloseIcon, Alert } from 'native-base';
-import { useAuth } from "../../context/auth";
+// import { useAuth } from "../../context/auth";
+import { useAuth } from '../../../context/AuthProvider';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { FlashList } from "@shopify/flash-list";
+import { CellContainer, FlashList } from "@shopify/flash-list";
+import Animated from 'react-native-reanimated';
+import { ItemClick } from 'native-base/lib/typescript/components/composites/Typeahead/useTypeahead/types';
 
 interface DrugData {
   _id: string;
@@ -33,13 +36,17 @@ interface ToastItem {
   isClosable?: boolean;
 }
 
+interface ModalVisibilityState {
+  [id: string]: boolean;
+}
+
 export default function Planner() {
 
   const router = useRouter();
 
   const toast = useToast();
 
-  const { onDeleteMedication } = useAuth();
+  const { onDeleteMedication, onGetMedications } = useAuth();
 
   const [spinner, setSpinner] = useState(false);
 
@@ -149,13 +156,7 @@ export default function Planner() {
     </Alert>
   );
 
-
-  const [modalVisible, setModalVisible] = useState<{ [id: string]: boolean }>({});
-
-  // const handleModalOpen = (id: string) => {
-  //   setModalVisible((prev) => ({ ...prev, [id]: true }));
-  //   console.log('Modal opened for:', id);
-  // };
+  const [modalVisible, setModalVisible] = useState<ModalVisibilityState>({});
 
   const handleModalOpen = (id: string) => {
     setModalVisible((prev) => {
@@ -177,7 +178,7 @@ export default function Planner() {
         updatedModals[id] = true;
       }
 
-      // console.log('Modal state:', updatedModals);
+      console.log('Modal opened for:', id);
       return updatedModals;
     });
   };
@@ -203,11 +204,16 @@ export default function Planner() {
   const handleDelete = async (id: string) => {
     setSpinner(true)
     const result = await onDeleteMedication!(id);
-    handleModalClose(id);
+    setModalVisible((prev) => ({ ...prev, [id]: false }))
     setSpinner(false)
     // console.log('Delete button pressed for ID:', id);
 
     if (result && !result.error) {
+
+      setRefreshing(true);
+      await refetch();
+      setRefreshing(false);
+
       toast.show({
         placement: "top",
         render: ({
@@ -216,7 +222,6 @@ export default function Planner() {
           return <ToastAlert id={id} title={"Medication Deleted!"} variant={"solid"} description={"Your Medication has been deleted."} duration={10000} status={"success"} isClosable={true} />;
         }
       })
-
 
     } else {
       toast.show({
@@ -275,12 +280,16 @@ export default function Planner() {
     },
   ];
 
+  const onLoadListener = useCallback(({ elapsedTimeInMs }: any) => {
+    console.log('List load time: ', elapsedTimeInMs)
+  }, [])
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
       <Stack.Screen options={{ headerShown: false, title: "Planner" }} />
       <Header headerTitle='Planner' />
-      <View style={{ flex: 1, width: '100%' }}>
+      <View style={{ flex: 1, width: '100%', backgroundColor: COLORS.white }}>
         {isLoading ? (
           <ActivityIndicator size='large' color={COLORS.primary} />
         ) : (
@@ -300,7 +309,7 @@ export default function Planner() {
             )}
             renderItem={({ item, index }: { item: DrugData, index: number }) => (
               <PlanDrugCard
-                key={item._id}
+                // key={item._id}
                 drug={item.name}
                 noOfTablets={item.timesDaily}
                 startDate={item.fromWhen.toString().split('T')[0]}
@@ -313,16 +322,19 @@ export default function Planner() {
                 onSharePress={() => handleShare(item._id)}
                 onDeletePress={() => handleDelete(item._id)}
                 onModalClose={() => handleModalClose(item._id)}
-                modalVisible={modalVisible[item._id]}
+                modalVisible={modalVisible}
                 id={item._id}
                 item={item}
                 status={item.status}
                 statusTextColor={item.status === 'active' ? '#2F8C18' : '#DC143C'}
                 statusBackgroundColor={item.status === 'active' ? '#2F8C1829' : '#DC143C29'}
+              // setModalVisible={setModalVisible}
               />
             )}
             estimatedItemSize={20}
             extraData={modalVisible}
+            onLoad={onLoadListener}
+          // disableAutoLayout={true}
           />
         )}
       </View>
@@ -392,6 +404,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingBottom: 10,
     width: '100%',
+    backgroundColor: COLORS.white
   },
 
   button: {

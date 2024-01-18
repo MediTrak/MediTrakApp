@@ -6,7 +6,8 @@ import { useToast, VStack, HStack, Center, IconButton, CloseIcon, Alert } from '
 import Spinner from 'react-native-loading-spinner-overlay';
 import { SafeAreaView } from "react-native-safe-area-context";
 import AnimatedCodeField from "../../components/CodeField";
-import { useAuth } from "../context/auth";
+// import { useAuth } from "../context/auth";
+import { useAuth } from "../../context/AuthProvider";
 interface FormData {
     token: string;
 }

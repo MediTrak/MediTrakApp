@@ -6,14 +6,21 @@ import { SplashScreen, Stack, useRouter } from 'expo-router';
 import { NativeBaseProvider } from 'native-base';
 import { store } from './store';
 import { Provider } from 'react-redux';
-import { AuthProvider } from './context/auth';
+// import { AuthProvider } from './context/auth';
 import { Linking, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Camera } from 'react-native-vision-camera';
-// import { AuthProvider } from '../context/AuthProvider';
+import { AuthProvider } from '../context/AuthProvider';
+import { vexo } from 'vexo-analytics';
+
+vexo(process.env.EXPO_PUBLIC_VEXO_API_KEY || '');
+
+const apiKey = process.env.EXPO_PUBLIC_VEXO_API_KEY;
+
+console.log(apiKey, ' :vexo api key')
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -78,14 +85,14 @@ function RootLayoutNav() {
   const responseListener = useRef<Notifications.Subscription>();
   const [showCamera, setShowCamera] = useState(false);
 
-  useEffect(() => {
-    async function getPermission() {
-      const newCameraPermission = await Camera.requestCameraPermission();
-      setShowCamera(true)
-      console.log('see camera permission:', newCameraPermission);
-    }
-    getPermission();
-  }, []);
+  // useEffect(() => {
+  //   async function getPermission() {
+  //     const newCameraPermission = await Camera.requestCameraPermission();
+  //     setShowCamera(true)
+  //     console.log('see camera permission:', newCameraPermission);
+  //   }
+  //   getPermission();
+  // }, []);
 
   useEffect(() => {
     let isMounted = true;
