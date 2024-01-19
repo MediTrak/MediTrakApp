@@ -173,17 +173,14 @@ export default function Login() {
       setSpinner(true)
 
       const resp = await onLogin!(email, password);
-      const user = await login(formData).unwrap()
+      // const user = await login(formData).unwrap()
 
-      dispatch(setCredentials(user))
-
-      const userToken = resp.data["token"]
+      // dispatch(setCredentials(user))
 
       setSpinner(false)
       if (resp && !resp.error) {
-        router.push({ pathname: "/(tabs)/home", params: { resp: userToken } });
+        router.push("/(tabs)/home");
       } else {
-        console.log(resp?.error)
         toast.show({
           placement: "top",
           render: ({

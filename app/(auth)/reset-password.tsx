@@ -209,7 +209,7 @@ export default function ResetPassword() {
                 < Icon as={<MaterialIcons name={show ? "visibility" : "visibility-off"} />} size={5} color="#2A2A2ACC" />
               </Pressable>
             </View>
-            <HStack justifyContent={'space-between'} style={{ height: 18 }}>
+            <HStack justifyContent={'space-between'} style={{ minHeight: 18 }}>
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </HStack>
           </View>
@@ -229,7 +229,7 @@ export default function ResetPassword() {
                 < Icon as={<MaterialIcons name={showTwo ? "visibility" : "visibility-off"} />} size={5} color="#2A2A2ACC" />
               </Pressable>
             </View>
-            <HStack justifyContent={'space-between'} style={{ height: 18 }}>
+            <HStack justifyContent={'space-between'} style={{ minHeight: 18 }}>
               {errors.confirmNewPassword && <Text style={styles.errorText}>{errors.confirmNewPassword}</Text>}
             </HStack>
           </View>

@@ -1,5 +1,5 @@
 import { ScrollView, StatusBar, StyleSheet, View, Text, TouchableOpacity, Platform, Modal, ActivityIndicator, RefreshControl, Image, Share, Button } from 'react-native';
-import { Stack, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, FONT, SIZES } from '../../../constants';
 import Header from '../../../components/Header';
@@ -13,8 +13,7 @@ import { HStack, VStack, useToast, IconButton, CloseIcon, Alert } from 'native-b
 import { useAuth } from '../../../context/AuthProvider';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { CellContainer, FlashList } from "@shopify/flash-list";
-import Animated from 'react-native-reanimated';
-import { ItemClick } from 'native-base/lib/typescript/components/composites/Typeahead/useTypeahead/types';
+import { useIsFocused } from '@react-navigation/native';
 
 interface DrugData {
   _id: string;
@@ -44,6 +43,8 @@ export default function Planner() {
 
   const router = useRouter();
 
+  const isFocused = useIsFocused();
+
   const toast = useToast();
 
   const { onDeleteMedication, onGetMedications } = useAuth();
@@ -62,6 +63,10 @@ export default function Planner() {
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
+  }, [refetch]);
+
+  const onFocusedRefresh = useCallback(async () => {
+    await refetch();
   }, [refetch]);
 
   useEffect(() => {
@@ -90,6 +95,10 @@ export default function Planner() {
     fetchData();
 
   }, [medication])
+
+  useEffect(() => {
+    isFocused && onFocusedRefresh()
+  }, [isFocused]);
 
   const [bottomSheetOpen, setBottomSheetOpen] = useState<{ [id: string]: boolean }>({})
 

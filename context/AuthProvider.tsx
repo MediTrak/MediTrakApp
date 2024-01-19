@@ -149,8 +149,7 @@ export const AuthProvider = ({ children }: any) => {
 
       return { data: result.data, error: false };
     } catch (e) {
-      console.error(e, 'error creating account');
-      return { error: true, msg: (e as any).response?.data?.msg || 'Unknown error occurred' };
+      return { error: true, msg: (e as any) };
     }
   };
 
@@ -205,7 +204,7 @@ export const AuthProvider = ({ children }: any) => {
       return { data: result.data, error: false }
 
     } catch (e) {
-      return { error: true, msg: (e as any).response.data.msg }
+      return { error: true, msg: (e as any) }
     }
   }
 
@@ -254,8 +253,8 @@ export const AuthProvider = ({ children }: any) => {
 
       return { data: result.data, error: false }
 
-    } catch (e) {
-      return { error: true, msg: (e as any).response.data.msg }
+    } catch (error) {
+      return { error: true, msg: (error as any) }
     }
   }
 
@@ -292,7 +291,7 @@ export const AuthProvider = ({ children }: any) => {
       return { data: result.data, error: false };
     } catch (e) {
       console.error(e, 'error requesting forgot password token');
-      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+      return { error: true, msg: (e as any) || 'Unknown error occurred' };
     }
   };
 
@@ -304,7 +303,7 @@ export const AuthProvider = ({ children }: any) => {
       return { data: result.data, error: false };
     } catch (e) {
       console.error(e, 'error resetting password');
-      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+      return { error: true, msg: (e as any) || 'Unknown error occurred' };
     }
   };
 
@@ -326,7 +325,7 @@ export const AuthProvider = ({ children }: any) => {
       return { data: result.data, error: false };
     } catch (e) {
       console.error(e, 'error creating medication');
-      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+      return { error: true, msg: (e as any) || 'Unknown error occurred' };
     }
 
   };
@@ -339,7 +338,7 @@ export const AuthProvider = ({ children }: any) => {
       return { data: result.data, error: false }
 
     } catch (e) {
-      return { error: true, msg: (e as any).response.data.msg }
+      return { error: true, msg: (e as any) }
     }
   }
 
@@ -359,7 +358,7 @@ export const AuthProvider = ({ children }: any) => {
       return { data: result.data, error: false };
     } catch (e) {
       console.error(e, 'error edit medication');
-      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+      return { error: true, msg: (e as any) || 'Unknown error occurred' };
     }
 
   };
@@ -379,8 +378,7 @@ export const AuthProvider = ({ children }: any) => {
 
       return { data: result.data, error: false };
     } catch (e) {
-      console.error(e, 'error deleting medication');
-      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+      return { error: true, msg: (e as any) || 'Unknown error occurred' };
     }
 
   };
@@ -400,8 +398,7 @@ export const AuthProvider = ({ children }: any) => {
 
       return { data: result.data, error: false };
     } catch (e) {
-      console.error(e, 'error accepting medication');
-      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+      return { error: true, msg: (e as any) || 'Unknown error occurred' };
     }
 
   };
@@ -421,8 +418,7 @@ export const AuthProvider = ({ children }: any) => {
 
       return { data: result.data, error: false };
     } catch (e) {
-      console.error(e, 'error getting medication');
-      return { error: true, msg: (e as any).response?.data?.message || 'Unknown error occurred' };
+      return { error: true, msg: (e as any) || 'Unknown error occurred' };
     }
 
   };

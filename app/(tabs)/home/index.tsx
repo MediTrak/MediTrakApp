@@ -22,6 +22,7 @@ import * as TaskManager from 'expo-task-manager';
 import { BackgroundFetchStatus } from 'expo-background-fetch';
 import { FlashList } from '@shopify/flash-list';
 import notifee, { AndroidImportance, AndroidNotificationSetting, TimestampTrigger, TriggerType } from '@notifee/react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 interface ToastItem {
   title: string;
@@ -45,9 +46,8 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
 
 
 export default function Home() {
-  const { resp } = useLocalSearchParams();
 
-  const toast = useToast();
+  const isFocused = useIsFocused()
 
   const { user } = useAuth()
 
@@ -65,22 +65,23 @@ export default function Home() {
 
   const { data: medication, isLoading, isFetching, error, refetch, isSuccess } = useGetMedicationQuery({});
 
-  // console.log('isSuccess: ', isSuccess, 'error: ', error, '<====see medication data status')
-
   const medicationData = medication?.data || [];
 
   const [refreshing, setRefreshing] = useState(false);
-
-  // if (!isSuccess) {
-  //   console.log(isSuccess, ":", error)
-  //   // router.push("/login");
-  // }
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
   }, [refetch]);
+
+  const onFocusedRefresh = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+
+  useEffect(() => {
+    isFocused && onFocusedRefresh()
+  }, [isFocused]);
 
   useEffect(() => {
 

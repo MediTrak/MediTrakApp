@@ -159,9 +159,9 @@ export default function MedicationForm() {
             return null
         }
 
-        console.log('Before state update:', errors.usageTimes);
+        // console.log('Before state update:', errors.usageTimes);
         setErrors(errors => ({ ...errors, [`usageTimes[${index}]`]: '' }));
-        console.log('After state update:', errors.usageTimes);
+        // console.log('After state update:', errors.usageTimes);
     };
 
     useEffect(() => {
@@ -357,6 +357,7 @@ export default function MedicationForm() {
 
                     const goBackWithDelay = () => {
                         setTimeout(() => {
+                            // router.push({ pathname: "/planner", params: { refresh: 'refresh' } });
                             navigation.goBack();
                         }, 2000); // 2000 milliseconds or 2 seconds
                     };

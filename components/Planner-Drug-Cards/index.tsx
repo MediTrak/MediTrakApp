@@ -92,37 +92,6 @@ const PlanDrugCard: React.FunctionComponent<Props> = ({
         <VStack style={styles.container}
         >
             {modalVisible[id] && (
-                // <View style={styles.modalView}
-                //     // key={`modal-${id}`}
-                // >
-                //     <View style={styles.cancelContainer}>
-                //         <TouchableOpacity onPress={onModalClose}>
-                //             <MaterialCommunityIcons name='close' size={20} />
-                //         </TouchableOpacity>
-                //     </View>
-
-                //     {onEditPress && (
-                //         <TouchableOpacity style={styles.textPress} onPress={onEditPress}>
-                //             <Text style={styles.titleText}>Edit</Text>
-                //         </TouchableOpacity>
-                //     )}
-
-                //     <View style={styles.divider} />
-
-                //     {onSharePress && (
-                //         <TouchableOpacity style={styles.textPress} onPress={onSharePress}>
-                //             <Text style={styles.titleText}>Share</Text>
-                //         </TouchableOpacity>
-                //     )}
-
-                //     <View style={styles.divider} />
-
-                //     {onDeletePress && (
-                //         <TouchableOpacity style={styles.textPress} onPress={onDeletePress}>
-                //             <Text style={[styles.titleText, { color: '#DD2E44' }]}>Delete</Text>
-                //         </TouchableOpacity>
-                //     )}
-                // </View>
                 <MemoizedPopup />
             )}
             <HStack justifyContent={'space-between'} alignItems={'center'} style={{ width: '100%' }}>
