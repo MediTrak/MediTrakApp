@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 
-import { useAuth } from "../app/context/auth";
+import { useAuth } from '../context/AuthProvider';
 
 interface AuthRoutesProps {
   children?: ReactNode;

@@ -84,6 +84,18 @@ export default function Planner() {
             return { ...item, status };
           });
 
+          // Sorting the array based on the 'status' property
+          filteredDates = filteredDates.sort((a: { status: string; }, b: { status: string; }) => {
+            // 'active' comes before 'inactive'
+            if (a.status === 'active' && b.status === 'inactive') {
+              return -1;
+            } else if (a.status === 'inactive' && b.status === 'active') {
+              return 1;
+            } else {
+              return 0; // Maintain the order if statuses are the same
+            }
+          });
+
           setFilteredData(filteredDates);
         }
       } catch (error) {
@@ -115,7 +127,7 @@ export default function Planner() {
     handlePresentModalPress()
     setBottomSheetOpen((prevIds) => ({
       ...prevIds,
-      [id]: !prevIds[id], // Toggle the value for the given id
+      [id]: !prevIds[id], 
     }));
     // console.log('Share button pressed for bottom sheet:', id);
   };

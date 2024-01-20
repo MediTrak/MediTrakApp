@@ -177,7 +177,7 @@ export default function CreateAccount() {
 
       // setParams(userParams)
 
-      console.log(userParams, 'user -params')
+      // console.log(userParams, 'user -params')
 
 
       setSpinner(true)

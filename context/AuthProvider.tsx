@@ -5,6 +5,7 @@ import { useRouter, useSegments } from "expo-router";
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../app/services/authSlice';
 import { MMKV } from 'react-native-mmkv';
+import { View, Text } from "react-native";
 
 
 interface User {
@@ -76,9 +77,6 @@ export const AuthProvider = ({ children }: any) => {
       try {
         const userToken = await SecureStore.getItemAsync(TOKEN_KEY)
         const userInfo = await SecureStore.getItemAsync(USER)
-
-        // console.log(userInfo, 'user info secure store auth file')
-        // console.log(userToken, 'token from secure store auth file')
 
         if (userToken && userInfo) {
           const storedUserInfo = JSON.parse(userInfo);

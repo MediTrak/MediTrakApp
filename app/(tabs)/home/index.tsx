@@ -67,6 +67,8 @@ export default function Home() {
 
   const medicationData = medication?.data || [];
 
+  // console.log(medicationData, 'see medication data')
+
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -75,12 +77,8 @@ export default function Home() {
     setRefreshing(false);
   }, [refetch]);
 
-  const onFocusedRefresh = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
-
   useEffect(() => {
-    isFocused && onFocusedRefresh()
+    isFocused && onRefresh()
   }, [isFocused]);
 
   useEffect(() => {
@@ -116,7 +114,7 @@ export default function Home() {
 
   // console.log(filteredData, 'see filtered Data')
 
-  let hasFilteredData = filteredData?.length > 0;
+  const hasFilteredData = filteredData?.length > 0;
 
   async function schedulePushNotification() {
     await Notifications.scheduleNotificationAsync({
@@ -324,20 +322,27 @@ export default function Home() {
 
             <Button title="Create Trigger Notifications" onPress={() => onCreateTriggerNotification()} /> */}
 
+            <Text style={{
+              fontSize: 14, fontWeight: '600', color: "#2a2a2a",
+              textAlign: "left", marginBottom: 20, marginTop: 10
+            }}>
+              Upcoming
+            </Text>
+
             <FlashList
               data={filteredData}
               keyExtractor={(item) => item._id}
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingVertical: 20 }}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-              ListHeaderComponent={() => (
-                <Text style={{
-                  fontSize: 14, fontWeight: '600', color: "#2a2a2a",
-                  textAlign: "left", marginBottom: 20
-                }}>
-                  Upcoming
-                </Text>
-              )}
+              // ListHeaderComponent={() => (
+              //   <Text style={{
+              //     fontSize: 14, fontWeight: '600', color: "#2a2a2a",
+              //     textAlign: "left", marginBottom: 20
+              //   }}>
+              //     Upcoming
+              //   </Text>
+              // )}
               renderItem={({ item }: { item: any }) => (
                 <DrugCard
                   key={item._id}
